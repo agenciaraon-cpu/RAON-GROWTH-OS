@@ -47,7 +47,7 @@ export const AgencyClientModal: React.FC<AgencyClientModalProps> = ({
     lastPaymentDate: initialData?.lastPaymentDate || new Date().toISOString().split('T')[0],
     services: initialData?.services || ['Gestão de Instagram & Feed', 'Tráfego Pago (Meta Ads)', 'Criativos Estáticos para Redes Sociais'],
     instagram: initialData?.instagram || '',
-    responsibleStaffName: initialData?.responsibleStaffName || (teamMembers[0]?.name || 'Felipe Rocha'),
+    responsibleStaffName: initialData?.responsibleStaffName || (teamMembers[0]?.name || 'Thiago Pinheiro (CEO)'),
     notes: initialData?.notes || '',
   });
 

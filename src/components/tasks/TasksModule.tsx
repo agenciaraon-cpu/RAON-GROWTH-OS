@@ -250,9 +250,9 @@ export const TasksModule: React.FC = () => {
                     onChange={e => setNewTask({ ...newTask, responsible: e.target.value })}
                     className="w-full px-3 py-2 rounded-lg bg-[#080B14] border border-[#151C2C] text-white focus:border-[#38BDF8] outline-hidden"
                   >
-                    <option value="Roberto Lima (SDR)">Roberto Lima (SDR)</option>
-                    <option value="Paula Mendes (Closer)">Paula Mendes (Closer)</option>
-                    <option value="Carlos Andrade (Consultor)">Carlos Andrade (Consultor)</option>
+                    <option value="Thiago Pinheiro (CEO)">Thiago Pinheiro (CEO)</option>
+                    <option value="Mateus Lima (Líder de Criativos)">Mateus Lima (Líder de Criativos)</option>
+                    <option value="Gabriela Alencar (Administradora)">Gabriela Alencar (Administradora)</option>
                   </select>
                 </div>
                 <div>

@@ -91,7 +91,7 @@ export const ClientModal: React.FC<ClientModalProps> = ({
     plan: initialData?.plan || 'Growth - R$ 8.900/mês',
     status: (initialData?.status || 'active') as Client['status'],
     startDate: initialData?.startDate || new Date().toISOString().split('T')[0],
-    raonResponsible: initialData?.raonResponsible || 'Felipe Rocha (Head de Growth)',
+    raonResponsible: initialData?.raonResponsible || 'Thiago Pinheiro (CEO)',
     monthlyTarget: initialData?.monthlyTarget || 250000,
     averageTicket: initialData?.averageTicket || 35000,
     healthScore: initialData?.healthScore || 85,
@@ -308,9 +308,9 @@ export const ClientModal: React.FC<ClientModalProps> = ({
                     onChange={e => setFormData({ ...formData, raonResponsible: e.target.value })}
                     className="w-full px-3 py-2 rounded-lg bg-[#080B14] border border-[#151C2C] text-white focus:border-[#38BDF8] outline-hidden"
                   >
-                    <option value="Felipe Rocha (Head de Growth)">Felipe Rocha (Head de Growth)</option>
-                    <option value="Mariana Duarte (Estrategista)">Mariana Duarte (Estrategista)</option>
-                    <option value="Carlos Andrade (Consultor de CRM)">Carlos Andrade (Consultor de CRM)</option>
+                    <option value="Thiago Pinheiro (CEO)">Thiago Pinheiro (CEO)</option>
+                    <option value="Mateus Lima (Líder de Criativos)">Mateus Lima (Líder de Criativos)</option>
+                    <option value="Gabriela Alencar (Administradora)">Gabriela Alencar (Administradora)</option>
                   </select>
                 </div>
                 <div>

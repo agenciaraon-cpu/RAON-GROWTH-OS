@@ -80,10 +80,10 @@ export const PipelineKanban: React.FC<PipelineKanbanProps> = ({
             onChange={e => setFilterResponsible(e.target.value)}
             className="px-2.5 py-1 rounded-lg bg-[#080B14] border border-[#151C2C] text-xs text-white outline-hidden"
           >
-            <option value="all">Todos os Vendedores</option>
-            <option value="Roberto Lima">Roberto Lima (SDR)</option>
-            <option value="Paula Mendes">Paula Mendes (Closer)</option>
-            <option value="Carlos Andrade">Carlos Andrade (Consultor)</option>
+            <option value="all">Toda a Equipe RAON</option>
+            <option value="Thiago Pinheiro">Thiago Pinheiro (CEO)</option>
+            <option value="Mateus Lima">Mateus Lima (Líder de Criativos)</option>
+            <option value="Gabriela Alencar">Gabriela Alencar (Administradora)</option>
           </select>
 
           <button

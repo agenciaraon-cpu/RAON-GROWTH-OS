@@ -3,11 +3,13 @@ import {
   Users, Plus, Search, Filter, Phone, Mail, 
   Briefcase, Calendar, CheckCircle2, Clock, 
   Trash2, Edit, MessageSquare, ShieldCheck, 
-  ArrowUpRight, Building2, Sparkles, AlertCircle 
+  ArrowUpRight, Building2, Sparkles, AlertCircle,
+  Eye, Camera, ExternalLink, UserCheck
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
 import { TeamMember } from '../../types';
 import { TeamMemberModal } from './TeamMemberModal';
+import { TeamMemberProfileModal } from './TeamMemberProfileModal';
 
 export const TeamModule: React.FC = () => {
   const { teamMembers, addTeamMember, updateTeamMember, deleteTeamMember } = useData();
@@ -15,8 +17,13 @@ export const TeamModule: React.FC = () => {
   const [search, setSearch] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedRole, setSelectedRole] = useState<string>('all');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // Modals state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [viewingProfileMember, setViewingProfileMember] = useState<TeamMember | null>(null);
 
   // Filter team members
   const filteredMembers = teamMembers.filter(m => {
@@ -45,25 +52,50 @@ export const TeamModule: React.FC = () => {
 
   const handleOpenEdit = (member: TeamMember) => {
     setEditingMember(member);
-    setIsModalOpen(true);
+    setIsEditModalOpen(true);
   };
 
   const handleOpenCreate = () => {
     setEditingMember(null);
-    setIsModalOpen(true);
+    setIsEditModalOpen(true);
+  };
+
+  const handleOpenProfile = (member: TeamMember) => {
+    setViewingProfileMember(member);
+    setIsProfileModalOpen(true);
   };
 
   const handleSave = (data: Omit<TeamMember, 'id' | 'createdAt'>) => {
     if (editingMember) {
       updateTeamMember(editingMember.id, data);
+      // Also update viewingProfileMember if it's the one open
+      if (viewingProfileMember && viewingProfileMember.id === editingMember.id) {
+        setViewingProfileMember({
+          ...viewingProfileMember,
+          ...data,
+        });
+      }
     } else {
       addTeamMember(data);
+    }
+  };
+
+  const handleUpdateAvatar = (memberId: string, avatarUrl: string | undefined) => {
+    updateTeamMember(memberId, { avatarUrl });
+    if (viewingProfileMember && viewingProfileMember.id === memberId) {
+      setViewingProfileMember({
+        ...viewingProfileMember,
+        avatarUrl,
+      });
     }
   };
 
   const handleDelete = (id: string, name: string) => {
     if (confirm(`Deseja realmente remover o colaborador "${name}" da equipe RAON?`)) {
       deleteTeamMember(id);
+      if (viewingProfileMember && viewingProfileMember.id === id) {
+        setIsProfileModalOpen(false);
+      }
     }
   };
 
@@ -84,7 +116,7 @@ export const TeamModule: React.FC = () => {
     if (status === 'vacation') {
       return (
         <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#FF9F43]/15 text-[#FF9F43] border border-[#FF9F43]/30 flex items-center gap-1">
-          <Clock className="w-3.5 h-3.5" /> Férias / Ausente
+          <Clock className="w-3.5 h-3.5" /> Férias
         </span>
       );
     }
@@ -110,16 +142,16 @@ export const TeamModule: React.FC = () => {
             Equipe da Agência RAON
           </h1>
           <p className="text-xs text-[#94A3B8] max-w-2xl mt-1">
-            Cadastre membros da equipe, determine nome, função, número de telefone e clientes atribuídos aos projetos de marketing.
+            Super Admin com controle total para editar foto de perfil, telefone, e-mail, admissão na agência, salário mensal e contas atendidas de cada colaborador.
           </p>
         </div>
 
         <button
           onClick={handleOpenCreate}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-[#2563EB] to-[#38BDF8] hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-[#2563EB]/25 shrink-0"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-[#2563EB] to-[#38BDF8] hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-[#2563EB]/25 shrink-0 cursor-pointer"
         >
           <Plus className="w-4 h-4" />
-          <span>Cadastrar Novo Membro da Equipe</span>
+          <span>Cadastrar Novo Colaborador</span>
         </button>
       </div>
 
@@ -130,7 +162,7 @@ export const TeamModule: React.FC = () => {
           <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Total Colaboradores</span>
           <div className="text-2xl font-bold text-white mt-1">{totalMembers}</div>
           <span className="text-[10px] text-[#22C55E] flex items-center gap-0.5 mt-1 font-medium">
-            <ArrowUpRight className="w-3 h-3" /> Time Completo
+            <ArrowUpRight className="w-3 h-3" /> Time RAON
           </span>
         </div>
 
@@ -143,6 +175,17 @@ export const TeamModule: React.FC = () => {
           </span>
         </div>
 
+        {/* Investimento em Folha */}
+        <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#38BDF8]/40 transition">
+          <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Folha Mensal</span>
+          <div className="text-2xl font-bold text-[#38BDF8] mt-1 font-mono">
+            R$ {totalSalaries.toLocaleString('pt-BR')}
+          </div>
+          <span className="text-[10px] text-[#94A3B8] font-mono">
+            Salários da agência
+          </span>
+        </div>
+
         {/* Média de Contas */}
         <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#FF7A18]/40 transition">
           <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Média de Contas</span>
@@ -150,17 +193,6 @@ export const TeamModule: React.FC = () => {
             {avgAccountsPerMember}
           </div>
           <span className="text-[10px] text-[#94A3B8]">Por colaborador</span>
-        </div>
-
-        {/* Investimento em Folha (Opcional) */}
-        <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#38BDF8]/40 transition">
-          <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Investimento em Folha</span>
-          <div className="text-2xl font-bold text-[#38BDF8] mt-1 font-mono">
-            R$ {(totalSalaries / 1000).toFixed(1)}k
-          </div>
-          <span className="text-[10px] text-[#94A3B8] font-mono">
-            R$ {totalSalaries.toLocaleString('pt-BR')} /mês
-          </span>
         </div>
 
         {/* Alocação de Contas */}
@@ -206,52 +238,73 @@ export const TeamModule: React.FC = () => {
             className="px-2.5 py-1.5 rounded-lg bg-[#080B14] border border-[#151C2C] text-xs text-white outline-hidden font-medium"
           >
             <option value="all">Todas as Funções</option>
-            <option value="tráfego">Tráfego Pago</option>
-            <option value="social media">Social Media</option>
-            <option value="designer">Design & Criativos</option>
-            <option value="copywriter">Copywriting</option>
-            <option value="growth">Estratégia / Growth</option>
+            <option value="ceo">CEO</option>
+            <option value="criativos">Líder de Criativos</option>
+            <option value="administradora">Administradora</option>
           </select>
         </div>
       </div>
 
       {/* Lista / Grid de Membros da Equipe */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredMembers.length === 0 ? (
           <div className="col-span-full p-12 text-center bg-[#101522] border border-[#151C2C] rounded-2xl">
             <Users className="w-12 h-12 text-[#94A3B8]/40 mx-auto mb-3" />
-            <h3 className="text-sm font-bold text-white">Nenhum membro encontrado</h3>
+            <h3 className="text-sm font-bold text-white">Nenhum colaborador encontrado</h3>
             <p className="text-xs text-[#94A3B8] mt-1 max-w-sm mx-auto">
-              Ajuste seus filtros de busca ou cadastre um novo membro para a equipe da agência.
+              Ajuste seus filtros de busca ou cadastre um novo membro para a equipe da agência RAON.
             </p>
             <button
               onClick={handleOpenCreate}
               className="mt-4 px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#38BDF8] text-white text-xs font-bold transition"
             >
-              Cadastrar Primeiro Membro
+              Cadastrar Colaborador
             </button>
           </div>
         ) : (
           filteredMembers.map(member => {
-            const cleanPhone = member.phone.replace(/\D/g, '');
             return (
               <div 
                 key={member.id}
                 className="p-5 rounded-2xl bg-[#101522] border border-[#151C2C] hover:border-[#38BDF8]/40 transition flex flex-col justify-between group shadow-lg"
               >
                 <div>
-                  {/* Card Header: Avatar, Name & Status */}
+                  {/* Card Header: Avatar com foto real, Nome, Cargo & Status */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-linear-to-br from-[#2563EB]/30 to-[#38BDF8]/20 border border-[#38BDF8]/30 flex items-center justify-center text-sm font-bold text-[#38BDF8] shrink-0">
-                        {member.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
-                      </div>
+                      {/* Avatar Image with Click to view profile */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenProfile(member)}
+                        className="w-14 h-14 rounded-2xl bg-[#080B14] border-2 border-[#38BDF8]/40 overflow-hidden flex items-center justify-center shrink-0 shadow-md group/avatar hover:scale-105 transition cursor-pointer relative"
+                        title="Ver Perfil Completo & Foto"
+                      >
+                        {member.avatarUrl ? (
+                          <img 
+                            src={member.avatarUrl} 
+                            alt={member.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-linear-to-br from-[#2563EB] to-[#38BDF8] flex items-center justify-center text-base font-bold text-white">
+                            {member.name.split(' ').map(n => n[0]).slice(0, 2).join('')}
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition">
+                          <Eye className="w-4 h-4 text-white" />
+                        </div>
+                      </button>
+
                       <div className="truncate">
-                        <h3 className="text-sm font-bold text-white truncate group-hover:text-[#38BDF8] transition">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenProfile(member)}
+                          className="text-left font-bold text-white hover:text-[#38BDF8] transition text-sm truncate block"
+                        >
                           {member.name}
-                        </h3>
-                        <p className="text-xs text-[#FF9F43] font-medium flex items-center gap-1 mt-0.5 truncate">
-                          <Briefcase className="w-3 h-3 shrink-0" />
+                        </button>
+                        <p className="text-xs text-[#FF9F43] font-semibold flex items-center gap-1 mt-0.5 truncate">
+                          <Briefcase className="w-3.5 h-3.5 shrink-0" />
                           <span className="truncate">{member.role}</span>
                         </p>
                       </div>
@@ -262,7 +315,7 @@ export const TeamModule: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Informações de Contato */}
+                  {/* Informações de Contato, Entrada e Salário */}
                   <div className="mt-4 pt-3 border-t border-[#151C2C] space-y-2 text-xs">
                     {/* Número de Telefone / WhatsApp */}
                     <div className="flex items-center justify-between text-[#94A3B8]">
@@ -291,33 +344,33 @@ export const TeamModule: React.FC = () => {
                           <Mail className="w-3.5 h-3.5 text-[#38BDF8]" />
                           <span>E-mail:</span>
                         </span>
-                        <span className="text-white truncate max-w-[180px]">{member.email}</span>
+                        <span className="text-white truncate max-w-[170px] font-mono">{member.email}</span>
                       </div>
                     )}
 
-                    {/* Data de Início */}
+                    {/* Data de Entrada na Agência */}
                     <div className="flex items-center justify-between text-[#94A3B8]">
                       <span className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5 text-[#94A3B8]" />
-                        <span>Na agência desde:</span>
+                        <Calendar className="w-3.5 h-3.5 text-[#FF9F43]" />
+                        <span>Entrada na agência:</span>
                       </span>
-                      <span className="text-white font-mono">
+                      <span className="text-white font-mono font-medium">
                         {new Date(member.startDate).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
 
-                    {/* Remuneração (se informada) */}
-                    {member.salary ? (
-                      <div className="flex items-center justify-between text-[#94A3B8]">
+                    {/* Salário Mensal */}
+                    <div className="flex items-center justify-between text-[#94A3B8]">
+                      <span className="flex items-center gap-1.5">
                         <span>Salário mensal:</span>
-                        <span className="text-[#22C55E] font-mono font-semibold">
-                          R$ {member.salary.toLocaleString('pt-BR')}
-                        </span>
-                      </div>
-                    ) : null}
+                      </span>
+                      <span className="text-[#22C55E] font-mono font-bold">
+                        {member.salary ? `R$ ${member.salary.toLocaleString('pt-BR')}` : 'R$ 0,00'}
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Clientes Atribuídos */}
+                  {/* Contas que Atendem */}
                   <div className="mt-4 pt-3 border-t border-[#151C2C]">
                     <div className="text-[11px] font-semibold text-[#94A3B8] mb-1.5 flex items-center justify-between">
                       <span className="flex items-center gap-1">
@@ -352,27 +405,38 @@ export const TeamModule: React.FC = () => {
                   )}
                 </div>
 
-                {/* Footer Actions */}
+                {/* Footer Actions: Ver Perfil, Editar Dados, WhatsApp, Remover */}
                 <div className="mt-5 pt-3 border-t border-[#151C2C] flex items-center justify-between">
-                  <button
-                    onClick={() => handleWhatsAppContact(member)}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-[#22C55E] hover:underline"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5" />
-                    <span>WhatsApp</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenProfile(member)}
+                      className="flex items-center gap-1 text-xs font-semibold text-[#38BDF8] hover:underline cursor-pointer"
+                      title="Ver perfil completo com foto grande"
+                    >
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>Ver Perfil</span>
+                    </button>
+
+                    <button
+                      onClick={() => handleWhatsAppContact(member)}
+                      className="flex items-center gap-1 text-xs font-semibold text-[#22C55E] hover:underline ml-2 cursor-pointer"
+                    >
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      <span>WhatsApp</span>
+                    </button>
+                  </div>
 
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => handleOpenEdit(member)}
-                      className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#38BDF8] hover:bg-[#151C2C] transition"
-                      title="Editar membro"
+                      className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#38BDF8] hover:bg-[#151C2C] transition cursor-pointer"
+                      title="Editar dados (Super Admin)"
                     >
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(member.id, member.name)}
-                      className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#151C2C] transition"
+                      className="p-1.5 rounded-lg text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#151C2C] transition cursor-pointer"
                       title="Remover membro"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -385,10 +449,19 @@ export const TeamModule: React.FC = () => {
         )}
       </div>
 
-      {/* Modal de Criação / Edição */}
+      {/* Modal de Perfil Detalhado do Colaborador (com visualização de foto grande e troca rápida de foto) */}
+      <TeamMemberProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        member={viewingProfileMember}
+        onEdit={(member) => handleOpenEdit(member)}
+        onUpdateAvatar={handleUpdateAvatar}
+      />
+
+      {/* Modal de Edição Completa dos Dados do Colaborador (Super Admin) */}
       <TeamMemberModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
         onSave={handleSave}
         initialData={editingMember}
       />

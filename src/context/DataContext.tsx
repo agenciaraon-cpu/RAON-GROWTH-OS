@@ -211,10 +211,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        const hasOldClients = Array.isArray(parsed) && parsed.some(
-          (t: any) => t.assignedClientNames?.includes('Clínica OdontoPrime')
+        const hasOldMembers = Array.isArray(parsed) && (
+          parsed.some((t: any) => t.name === 'Felipe Rocha' || t.name === 'Mariana Duarte' || t.name === 'Lucas Fontes' || t.name === 'Beatriz Souza' || t.name === 'Carlos Andrade') ||
+          !parsed.some((t: any) => t.name === 'Thiago Pinheiro') ||
+          !parsed.some((t: any) => t.name === 'Mateus Lima') ||
+          !parsed.some((t: any) => t.name === 'Gabriela Alencar')
         );
-        if (hasOldClients) {
+        if (hasOldMembers) {
           localStorage.setItem('raon_data_team_members', JSON.stringify(DEMO_TEAM_MEMBERS));
           return DEMO_TEAM_MEMBERS;
         }

@@ -263,6 +263,7 @@ export interface TeamMember {
   assignedClientNames?: string[];
   startDate: string;
   salary?: number;
+  avatarUrl?: string; // Foto de perfil
   notes?: string;
   createdAt: string;
   updatedAt?: string;
