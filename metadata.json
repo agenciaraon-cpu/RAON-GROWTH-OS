@@ -1,0 +1,6 @@
+{
+  "name": "RAON GROWTH OS",
+  "description": "Plataforma SaaS de infraestrutura comercial, marketing, IA, CRM multi-tenant e automação de crescimento da RAON.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

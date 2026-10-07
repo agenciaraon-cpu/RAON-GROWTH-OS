@@ -1,0 +1,271 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile in the platform",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "name": { "type": "string", "maxLength": 128 },
+        "role": { "type": "string", "enum": ["super_admin", "client_admin", "sales_user"], "maxLength": 32 },
+        "currentOrganizationId": { "type": "string", "maxLength": 128 },
+        "avatar": { "type": "string", "maxLength": 512 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "name", "role"]
+    },
+    "Organization": {
+      "title": "Organization",
+      "description": "Tenant organization representing a company or client space",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "slug": { "type": "string", "maxLength": 128 },
+        "cnpj": { "type": "string", "maxLength": 32 },
+        "segment": { "type": "string", "maxLength": 64 },
+        "plan": { "type": "string", "enum": ["Starter", "Growth", "Scale", "Enterprise"], "maxLength": 32 },
+        "status": { "type": "string", "enum": ["active", "trialing", "past_due", "canceled"], "maxLength": 32 },
+        "ownerUid": { "type": "string", "maxLength": 128 },
+        "mrr": { "type": "number" },
+        "healthScore": { "type": "number" },
+        "churnRisk": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name", "plan", "status"]
+    },
+    "OrganizationMember": {
+      "title": "OrganizationMember",
+      "description": "Membership linking a user to an organization with role",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "email": { "type": "string", "maxLength": 256 },
+        "role": { "type": "string", "enum": ["super_admin", "client_admin", "sales_user"], "maxLength": 32 },
+        "joinedAt": { "type": "string" }
+      },
+      "required": ["organizationId", "userId", "role"]
+    },
+    "Client": {
+      "title": "Client",
+      "description": "Client company managed under RAON or by organization",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "cnpj": { "type": "string", "maxLength": 32 },
+        "segment": { "type": "string", "maxLength": 64 },
+        "city": { "type": "string", "maxLength": 128 },
+        "state": { "type": "string", "maxLength": 32 },
+        "website": { "type": "string", "maxLength": 256 },
+        "instagram": { "type": "string", "maxLength": 128 },
+        "whatsapp": { "type": "string", "maxLength": 32 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "plan": { "type": "string", "maxLength": 32 },
+        "status": { "type": "string", "enum": ["active", "inactive", "onboarding", "churned"], "maxLength": 32 },
+        "startDate": { "type": "string", "maxLength": 64 },
+        "raonResponsible": { "type": "string", "maxLength": 128 },
+        "monthlyTarget": { "type": "number" },
+        "averageTicket": { "type": "number" },
+        "healthScore": { "type": "number" },
+        "churnRisk": { "type": "number" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["organizationId", "name", "segment", "status"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "Sales lead in CRM",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "clientId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "phone": { "type": "string", "maxLength": 32 },
+        "whatsapp": { "type": "string", "maxLength": 32 },
+        "email": { "type": "string", "format": "email", "maxLength": 256 },
+        "company": { "type": "string", "maxLength": 128 },
+        "city": { "type": "string", "maxLength": 128 },
+        "state": { "type": "string", "maxLength": 32 },
+        "origin": { "type": "string", "maxLength": 64 },
+        "campaignId": { "type": "string", "maxLength": 128 },
+        "campaignName": { "type": "string", "maxLength": 128 },
+        "service": { "type": "string", "maxLength": 128 },
+        "responsible": { "type": "string", "maxLength": 128 },
+        "stage": { "type": "string", "maxLength": 64 },
+        "pipelineId": { "type": "string", "maxLength": 128 },
+        "potentialValue": { "type": "number" },
+        "notes": { "type": "string", "maxLength": 2048 },
+        "nextAction": { "type": "string", "maxLength": 256 },
+        "lastInteractionAt": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["organizationId", "name", "origin", "stage"]
+    },
+    "Deal": {
+      "title": "Deal",
+      "description": "Sales opportunity deal in pipeline",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "leadId": { "type": "string", "maxLength": 128 },
+        "clientId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 128 },
+        "value": { "type": "number" },
+        "pipelineId": { "type": "string", "maxLength": 128 },
+        "stage": { "type": "string", "maxLength": 64 },
+        "responsible": { "type": "string", "maxLength": 128 },
+        "status": { "type": "string", "enum": ["open", "won", "lost"], "maxLength": 32 },
+        "wonAt": { "type": "string" },
+        "lostAt": { "type": "string" },
+        "lostReason": { "type": "string", "maxLength": 256 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["organizationId", "title", "value", "stage", "status"]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Task assigned to team member",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "title": { "type": "string", "maxLength": 128 },
+        "description": { "type": "string", "maxLength": 2048 },
+        "responsible": { "type": "string", "maxLength": 128 },
+        "dueDate": { "type": "string", "maxLength": 64 },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "urgent"], "maxLength": 32 },
+        "status": { "type": "string", "enum": ["pending", "in_progress", "completed", "overdue"], "maxLength": 32 },
+        "clientId": { "type": "string", "maxLength": 128 },
+        "leadId": { "type": "string", "maxLength": 128 },
+        "dealId": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["organizationId", "title", "status", "priority"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "Timeline log for lead or deal interaction",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "leadId": { "type": "string", "maxLength": 128 },
+        "dealId": { "type": "string", "maxLength": 128 },
+        "type": { "type": "string", "enum": ["lead_created", "contact", "call", "whatsapp", "note", "proposal", "follow_up", "won", "lost", "stage_change"], "maxLength": 64 },
+        "description": { "type": "string", "maxLength": 1024 },
+        "userName": { "type": "string", "maxLength": 128 },
+        "userUid": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["organizationId", "type", "description"]
+    },
+    "Campaign": {
+      "title": "Campaign",
+      "description": "Marketing campaign",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "clientId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "channel": { "type": "string", "enum": ["Meta Ads", "Google Ads", "TikTok Ads", "Organico", "WhatsApp", "Indicacao", "Outros"], "maxLength": 64 },
+        "objective": { "type": "string", "maxLength": 128 },
+        "budget": { "type": "number" },
+        "spent": { "type": "number" },
+        "leads": { "type": "number" },
+        "sales": { "type": "number" },
+        "revenue": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "paused", "completed"], "maxLength": 32 },
+        "startDate": { "type": "string", "maxLength": 64 },
+        "endDate": { "type": "string", "maxLength": 64 },
+        "landingPage": { "type": "string", "maxLength": 256 },
+        "utmSource": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["organizationId", "name", "channel", "status"]
+    },
+    "Automation": {
+      "title": "Automation",
+      "description": "Workflow automation",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "name": { "type": "string", "maxLength": 128 },
+        "trigger": { "type": "string", "maxLength": 64 },
+        "active": { "type": "boolean" },
+        "executionCount": { "type": "number" },
+        "stepsCount": { "type": "number" },
+        "description": { "type": "string", "maxLength": 512 },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["organizationId", "name", "trigger", "active"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Security and system audit log",
+      "type": "object",
+      "properties": {
+        "organizationId": { "type": "string", "maxLength": 128 },
+        "userId": { "type": "string", "maxLength": 128 },
+        "userName": { "type": "string", "maxLength": 128 },
+        "action": { "type": "string", "maxLength": 64 },
+        "entity": { "type": "string", "maxLength": 64 },
+        "entityId": { "type": "string", "maxLength": 128 },
+        "details": { "type": "string", "maxLength": 2048 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["organizationId", "action", "entity", "details"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/organizations/{organizationId}": {
+      "schema": "Organization",
+      "description": "Tenants and organizations"
+    },
+    "/clients/{clientId}": {
+      "schema": "Client",
+      "description": "Client companies"
+    },
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "CRM leads"
+    },
+    "/deals/{dealId}": {
+      "schema": "Deal",
+      "description": "Sales deals"
+    },
+    "/tasks/{taskId}": {
+      "schema": "Task",
+      "description": "Tasks"
+    },
+    "/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Lead and deal timeline activities"
+    },
+    "/campaigns/{campaignId}": {
+      "schema": "Campaign",
+      "description": "Marketing campaigns"
+    },
+    "/automations/{automationId}": {
+      "schema": "Automation",
+      "description": "Marketing and sales automations"
+    },
+    "/auditLogs/{logId}": {
+      "schema": "AuditLog",
+      "description": "System audit trail logs"
+    }
+  }
+}
