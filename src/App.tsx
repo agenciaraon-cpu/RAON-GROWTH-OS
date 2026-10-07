@@ -6,6 +6,8 @@ import { Header } from './components/layout/Header';
 import { RaonCommandCenter } from './components/dashboard/RaonCommandCenter';
 import { ClientDashboard } from './components/dashboard/ClientDashboard';
 import { ClientsModule } from './components/clients/ClientsModule';
+import { AgencyClientsModule } from './components/agency-clients/AgencyClientsModule';
+import { TeamModule } from './components/team/TeamModule';
 import { CrmModule } from './components/crm/CrmModule';
 import { TasksModule } from './components/tasks/TasksModule';
 import { CampaignsModule } from './components/campaigns/CampaignsModule';
@@ -99,7 +101,17 @@ function AppContent() {
             )
           )}
 
-          {/* CLIENTES ROUTE */}
+          {/* CLIENTES DA AGÊNCIA (SUPER ADMIN EXCLUSIVO) */}
+          {currentTab === 'clientes_agencia' && (
+            <AgencyClientsModule />
+          )}
+
+          {/* EQUIPE RAON (SUPER ADMIN EXCLUSIVO) */}
+          {currentTab === 'equipe' && (
+            <TeamModule />
+          )}
+
+          {/* CLIENTES TENANTS ROUTE */}
           {currentTab === 'clientes' && (
             <ClientsModule
               onNavigateTab={(tab) => setCurrentTab(tab)}

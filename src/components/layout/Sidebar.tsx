@@ -9,6 +9,8 @@ import { useAuth } from '../../context/AuthContext';
 
 export type NavItem = 
   | 'dashboard'
+  | 'clientes_agencia'
+  | 'equipe'
   | 'clientes'
   | 'crm'
   | 'tarefas'
@@ -39,8 +41,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const menuItems: { id: NavItem; label: string; icon: React.ReactNode; badge?: string; superAdminOnly?: boolean }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-    { id: 'clientes', label: 'Clientes', icon: <Building2 className="w-4 h-4" />, badge: currentRole === 'super_admin' ? 'RAON' : undefined },
+    { 
+      id: 'clientes_agencia', 
+      label: 'Clientes da Agência', 
+      icon: <Building2 className="w-4 h-4 text-[#FF7A18]" />, 
+      badge: 'Contratos',
+      superAdminOnly: true 
+    },
+    { 
+      id: 'equipe', 
+      label: 'Equipe RAON', 
+      icon: <Users className="w-4 h-4 text-[#38BDF8]" />, 
+      badge: 'Time',
+      superAdminOnly: true 
+    },
     { id: 'crm', label: 'CRM & Pipeline', icon: <Flame className="w-4 h-4" />, badge: 'Pro' },
+    { id: 'clientes', label: 'Tenants / Empresas', icon: <Building2 className="w-4 h-4" /> },
     { id: 'tarefas', label: 'Tarefas', icon: <CheckSquare className="w-4 h-4" /> },
     { id: 'campanhas', label: 'Campanhas', icon: <Megaphone className="w-4 h-4" /> },
     { id: 'automacoes', label: 'Automações', icon: <Workflow className="w-4 h-4" /> },

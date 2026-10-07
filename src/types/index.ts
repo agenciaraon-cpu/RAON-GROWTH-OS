@@ -228,3 +228,43 @@ export interface Integration {
   config: Record<string, string>;
   description: string;
 }
+
+export type AgencyPlan = 'Bronze' | 'Prata' | 'Ouro';
+export type PaymentStatus = 'paid' | 'pending' | 'overdue';
+
+export interface AgencyClient {
+  id: string;
+  clientName: string; // Nome do responsável/cliente
+  companyName: string; // Empresa
+  document: string; // CNPJ ou CPF
+  phone: string; // Número de telefone / WhatsApp
+  email?: string;
+  contractStartDate: string; // Data de contratação / início
+  dueDay: number; // Dia de vencimento do pagamento (ex: 5, 10, 15, 20)
+  monthlyValue: number; // Valor mensal do contrato
+  plan: AgencyPlan; // Bronze, Prata, Ouro
+  paymentStatus: PaymentStatus; // Pago, Pendente, Atrasado
+  lastPaymentDate?: string;
+  services: string[]; // ['Gestão de Instagram', 'Tráfego Pago', 'Criativos para Redes Sociais', 'Marketing Geral']
+  instagram?: string;
+  notes?: string;
+  responsibleStaffName?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string; // Função / Cargo
+  phone: string;
+  email: string;
+  status: 'active' | 'vacation' | 'inactive';
+  assignedClientNames?: string[];
+  startDate: string;
+  salary?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+

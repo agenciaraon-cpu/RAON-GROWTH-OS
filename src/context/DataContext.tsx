@@ -1,12 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { 
   Client, Lead, Deal, Task, Activity, Campaign, Automation, 
-  AuditLog, AIInsight, Integration, LeadStage, DealStatus 
+  AuditLog, AIInsight, Integration, LeadStage, DealStatus,
+  AgencyClient, TeamMember, PaymentStatus
 } from '../types';
 import { 
   DEMO_CLIENTS, generateDemoLeads, generateDemoDeals, 
   DEMO_CAMPAIGNS, DEMO_TASKS, DEMO_AUTOMATIONS, 
-  DEMO_AUDIT_LOGS, DEMO_AI_INSIGHTS, DEMO_INTEGRATIONS 
+  DEMO_AUDIT_LOGS, DEMO_AI_INSIGHTS, DEMO_INTEGRATIONS,
+  DEMO_AGENCY_CLIENTS, DEMO_TEAM_MEMBERS
 } from '../data/demoData';
 import { useAuth } from './AuthContext';
 
@@ -21,6 +23,19 @@ interface DataContextType {
   auditLogs: AuditLog[];
   aiInsights: AIInsight[];
   integrations: Integration[];
+
+  // Agency Clients (Gestão de Contratos de Marketing da RAON)
+  agencyClients: AgencyClient[];
+  addAgencyClient: (client: Omit<AgencyClient, 'id' | 'createdAt'>) => AgencyClient;
+  updateAgencyClient: (id: string, updates: Partial<AgencyClient>) => void;
+  deleteAgencyClient: (id: string) => void;
+  updateAgencyPaymentStatus: (id: string, status: PaymentStatus) => void;
+
+  // Team Members (Equipe da Agência RAON)
+  teamMembers: TeamMember[];
+  addTeamMember: (member: Omit<TeamMember, 'id' | 'createdAt'>) => TeamMember;
+  updateTeamMember: (id: string, updates: Partial<TeamMember>) => void;
+  deleteTeamMember: (id: string) => void;
   
   // CRUD actions
   addClient: (client: Omit<Client, 'id' | 'createdAt'>) => Client;
@@ -132,6 +147,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return saved ? JSON.parse(saved) : DEMO_INTEGRATIONS;
   });
 
+  const [allAgencyClients, setAllAgencyClients] = useState<AgencyClient[]>(() => {
+    const saved = localStorage.getItem('raon_data_agency_clients');
+    return saved ? JSON.parse(saved) : DEMO_AGENCY_CLIENTS;
+  });
+
+  const [allTeamMembers, setAllTeamMembers] = useState<TeamMember[]>(() => {
+    const saved = localStorage.getItem('raon_data_team_members');
+    return saved ? JSON.parse(saved) : DEMO_TEAM_MEMBERS;
+  });
+
   // Save to localStorage on change
   useEffect(() => {
     localStorage.setItem('raon_data_clients', JSON.stringify(allClients));
@@ -143,7 +168,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('raon_data_automations', JSON.stringify(allAutomations));
     localStorage.setItem('raon_data_audit', JSON.stringify(allAuditLogs));
     localStorage.setItem('raon_data_integrations', JSON.stringify(allIntegrations));
-  }, [allClients, allLeads, allDeals, allTasks, allActivities, allCampaigns, allAutomations, allAuditLogs, allIntegrations]);
+    localStorage.setItem('raon_data_agency_clients', JSON.stringify(allAgencyClients));
+    localStorage.setItem('raon_data_team_members', JSON.stringify(allTeamMembers));
+  }, [allClients, allLeads, allDeals, allTasks, allActivities, allCampaigns, allAutomations, allAuditLogs, allIntegrations, allAgencyClients, allTeamMembers]);
 
   // STRICT MULTI-TENANT FILTERING:
   // If user is super_admin on org-raon, they see all or RAON data.
@@ -447,6 +474,67 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }));
   };
 
+  // Agency Clients CRUD
+  const addAgencyClient = (data: Omit<AgencyClient, 'id' | 'createdAt'>) => {
+    const newClient: AgencyClient = {
+      ...data,
+      id: `ac-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    setAllAgencyClients(prev => [newClient, ...prev]);
+    logAudit('create', 'Cliente RAON', `Cliente de Marketing "${newClient.companyName}" cadastrado no plano ${newClient.plan}.`, newClient.id);
+    return newClient;
+  };
+
+  const updateAgencyClient = (id: string, updates: Partial<AgencyClient>) => {
+    setAllAgencyClients(prev => prev.map(c => c.id === id ? { ...c, ...updates, updatedAt: new Date().toISOString() } : c));
+    logAudit('edit', 'Cliente RAON', `Dados do cliente de marketing atualizados.`, id);
+  };
+
+  const deleteAgencyClient = (id: string) => {
+    const found = allAgencyClients.find(c => c.id === id);
+    setAllAgencyClients(prev => prev.filter(c => c.id !== id));
+    logAudit('delete', 'Cliente RAON', `Cliente "${found?.companyName || id}" removido da agência.`, id);
+  };
+
+  const updateAgencyPaymentStatus = (id: string, status: PaymentStatus) => {
+    setAllAgencyClients(prev => prev.map(c => {
+      if (c.id === id) {
+        logAudit('edit', 'Pagamento', `Status de pagamento do cliente "${c.companyName}" alterado para ${status}.`, id);
+        return { 
+          ...c, 
+          paymentStatus: status, 
+          lastPaymentDate: status === 'paid' ? new Date().toISOString().split('T')[0] : c.lastPaymentDate,
+          updatedAt: new Date().toISOString() 
+        };
+      }
+      return c;
+    }));
+  };
+
+  // Team Member CRUD
+  const addTeamMember = (data: Omit<TeamMember, 'id' | 'createdAt'>) => {
+    const newMember: TeamMember = {
+      ...data,
+      id: `team-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    setAllTeamMembers(prev => [newMember, ...prev]);
+    logAudit('create', 'Equipe RAON', `Membro da equipe "${newMember.name}" adicionado na função ${newMember.role}.`, newMember.id);
+    return newMember;
+  };
+
+  const updateTeamMember = (id: string, updates: Partial<TeamMember>) => {
+    setAllTeamMembers(prev => prev.map(m => m.id === id ? { ...m, ...updates, updatedAt: new Date().toISOString() } : m));
+    logAudit('edit', 'Equipe RAON', `Cadastro do membro da equipe atualizado.`, id);
+  };
+
+  const deleteTeamMember = (id: string) => {
+    const found = allTeamMembers.find(m => m.id === id);
+    setAllTeamMembers(prev => prev.filter(m => m.id !== id));
+    logAudit('delete', 'Equipe RAON', `Membro "${found?.name || id}" removido da equipe.`, id);
+  };
+
   const resetToDemo = () => {
     const leads = generateDemoLeads();
     setAllClients(DEMO_CLIENTS);
@@ -457,6 +545,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAllAutomations(DEMO_AUTOMATIONS);
     setAllAuditLogs(DEMO_AUDIT_LOGS);
     setAllIntegrations(DEMO_INTEGRATIONS);
+    setAllAgencyClients(DEMO_AGENCY_CLIENTS);
+    setAllTeamMembers(DEMO_TEAM_MEMBERS);
     logAudit('create', 'Sistema', 'Base redefinida para os dados padrão da demonstração DEMO.');
   };
 
@@ -466,6 +556,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAllDeals([]);
     setAllTasks([]);
     setAllCampaigns([]);
+    setAllAgencyClients([]);
+    setAllTeamMembers([]);
     logAudit('delete', 'Sistema', 'Dados de produção limpos.');
   };
 
@@ -482,6 +574,15 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         auditLogs,
         aiInsights: allAIInsights,
         integrations,
+        agencyClients: allAgencyClients,
+        addAgencyClient,
+        updateAgencyClient,
+        deleteAgencyClient,
+        updateAgencyPaymentStatus,
+        teamMembers: allTeamMembers,
+        addTeamMember,
+        updateTeamMember,
+        deleteTeamMember,
         addClient,
         updateClient,
         deleteClient,
