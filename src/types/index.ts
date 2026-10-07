@@ -268,3 +268,37 @@ export interface TeamMember {
   updatedAt?: string;
 }
 
+export interface AgencyWhatsAppConfig {
+  provider: 'direct_web' | 'zapi' | 'evolution' | 'meta_cloud';
+  businessPhone: string;
+  instanceId?: string;
+  apiKey?: string;
+  webhookUrl?: string;
+  isConnected: boolean;
+  pixKey?: string;
+  mode?: 'direct_web' | 'api_gateway';
+}
+
+export interface ClientAutomationRule {
+  id: string;
+  type: 'overdue_3days' | 'monday_greeting' | 'saturday_weekend';
+  title: string;
+  enabled: boolean;
+  scheduleTime: string; // ex: '08:30'
+  messageTemplate: string;
+  daysDelay?: number; // ex: 3
+  lastTriggeredAt?: string;
+  sentCount: number;
+}
+
+export interface WhatsAppMessageLog {
+  id: string;
+  clientName: string;
+  companyName: string;
+  phone: string;
+  type: 'overdue_3days' | 'monday_greeting' | 'saturday_weekend' | 'manual';
+  message: string;
+  status: 'sent' | 'scheduled' | 'failed';
+  sentAt: string;
+}
+

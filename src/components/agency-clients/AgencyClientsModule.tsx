@@ -8,6 +8,7 @@ import {
 import { useData } from '../../context/DataContext';
 import { AgencyClient, AgencyPlan, PaymentStatus } from '../../types';
 import { AgencyClientModal } from './AgencyClientModal';
+import { AgencyWhatsAppAutomationsModal } from './AgencyWhatsAppAutomationsModal';
 
 export const AgencyClientsModule: React.FC = () => {
   const { agencyClients, addAgencyClient, updateAgencyClient, deleteAgencyClient, updateAgencyPaymentStatus } = useData();
@@ -16,6 +17,7 @@ export const AgencyClientsModule: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<AgencyClient | null>(null);
 
   // Filtered clients
@@ -137,13 +139,23 @@ export const AgencyClientsModule: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={handleOpenCreate}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-[#FF7A18] to-[#FF9F43] hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-[#FF7A18]/25 shrink-0"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Adicionar Novo Cliente da Agência</span>
-        </button>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={() => setIsWhatsAppModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-[#22C55E] to-[#16A34A] hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-[#22C55E]/25 shrink-0"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>WhatsApp API & Mensagens Automáticas</span>
+          </button>
+
+          <button
+            onClick={handleOpenCreate}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-[#FF7A18] to-[#FF9F43] hover:opacity-95 text-white text-xs font-bold transition shadow-lg shadow-[#FF7A18]/25 shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Adicionar Novo Cliente da Agência</span>
+          </button>
+        </div>
       </div>
 
       {/* DASHBOARD EXCLUSIVO DOS CLIENTES DA AGÊNCIA */}
@@ -160,19 +172,19 @@ export const AgencyClientsModule: React.FC = () => {
         {/* MRR Total */}
         <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#22C55E]/40 transition">
           <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Faturamento Mensal (MRR)</span>
-          <div className="text-2xl font-bold text-[#22C55E] mt-1 font-mono">
-            R$ {(totalMrr / 1000).toFixed(1)}k
+          <div className="text-xl sm:text-2xl font-bold text-[#22C55E] mt-1 font-mono">
+            R$ {totalMrr.toLocaleString('pt-BR')}
           </div>
           <span className="text-[10px] text-[#94A3B8] font-mono">
-            R$ {totalMrr.toLocaleString('pt-BR')} /mês
+            {totalClients} clientes na base
           </span>
         </div>
 
         {/* Total Recebido */}
         <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#22C55E]/40 transition">
           <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Mensalidades Pagas</span>
-          <div className="text-2xl font-bold text-white mt-1 font-mono">
-            R$ {(totalPaidValue / 1000).toFixed(1)}k
+          <div className="text-xl sm:text-2xl font-bold text-white mt-1 font-mono">
+            R$ {totalPaidValue.toLocaleString('pt-BR')}
           </div>
           <span className="text-[10px] text-[#22C55E] font-medium">
             {paidClients.length} de {totalClients} recebidos
@@ -182,8 +194,8 @@ export const AgencyClientsModule: React.FC = () => {
         {/* Total Pendente */}
         <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#38BDF8]/40 transition">
           <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">A Vencer (Pendente)</span>
-          <div className="text-2xl font-bold text-[#38BDF8] mt-1 font-mono">
-            R$ {(totalPendingValue / 1000).toFixed(1)}k
+          <div className="text-xl sm:text-2xl font-bold text-[#38BDF8] mt-1 font-mono">
+            R$ {totalPendingValue.toLocaleString('pt-BR')}
           </div>
           <span className="text-[10px] text-[#94A3B8]">
             {pendingClients.length} contratos a vencer
@@ -193,8 +205,8 @@ export const AgencyClientsModule: React.FC = () => {
         {/* Inadimplência / Atrasados */}
         <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#EF4444]/40 transition">
           <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Em Atraso</span>
-          <div className="text-2xl font-bold text-[#EF4444] mt-1 font-mono">
-            R$ {(totalOverdueValue / 1000).toFixed(1)}k
+          <div className="text-xl sm:text-2xl font-bold text-[#EF4444] mt-1 font-mono">
+            R$ {totalOverdueValue.toLocaleString('pt-BR')}
           </div>
           <span className="text-[10px] text-[#EF4444] font-medium">
             {overdueClients.length} {overdueClients.length === 1 ? 'cliente atrasado' : 'clientes atrasados'}
@@ -204,8 +216,8 @@ export const AgencyClientsModule: React.FC = () => {
         {/* Ticket Médio */}
         <div className="p-4 rounded-xl bg-[#101522] border border-[#151C2C] hover:border-[#FF7A18]/40 transition">
           <span className="text-[10px] font-semibold text-[#94A3B8] uppercase">Ticket Médio RAON</span>
-          <div className="text-2xl font-bold text-[#FF9F43] mt-1 font-mono">
-            R$ {(avgTicket / 1000).toFixed(1)}k
+          <div className="text-xl sm:text-2xl font-bold text-[#FF9F43] mt-1 font-mono">
+            R$ {Math.round(avgTicket).toLocaleString('pt-BR')}
           </div>
           <span className="text-[10px] text-[#94A3B8]">Por cliente/mês</span>
         </div>
@@ -479,12 +491,18 @@ export const AgencyClientsModule: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal de Cliente */}
       <AgencyClientModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         initialData={editingClient}
+      />
+
+      {/* Modal de Automações WhatsApp da Agência */}
+      <AgencyWhatsAppAutomationsModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
       />
     </div>
   );

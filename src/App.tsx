@@ -8,6 +8,8 @@ import { ClientDashboard } from './components/dashboard/ClientDashboard';
 import { ClientsModule } from './components/clients/ClientsModule';
 import { AgencyClientsModule } from './components/agency-clients/AgencyClientsModule';
 import { TeamModule } from './components/team/TeamModule';
+import { ClientOnboardingModal } from './components/clients/ClientOnboardingModal';
+import { PublicClientRegistrationView } from './components/clients/PublicClientRegistrationView';
 import { CrmModule } from './components/crm/CrmModule';
 import { TasksModule } from './components/tasks/TasksModule';
 import { CampaignsModule } from './components/campaigns/CampaignsModule';
@@ -32,7 +34,15 @@ function AppContent() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
+  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
   const [drawerLead, setDrawerLead] = useState<Lead | null>(null);
+
+  // Check if current URL is the public self-registration link for clients
+  const [isPublicRegistration, setIsPublicRegistration] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const search = window.location.search;
+    return search.includes('cadastro=empresa') || search.includes('onboarding=novo_cliente');
+  });
 
   // Global keydown listener for CTRL + K
   useEffect(() => {
@@ -56,7 +66,7 @@ function AppContent() {
       setDrawerLead(item);
       setCurrentTab('crm');
     } else if (type === 'client') {
-      setCurrentTab('clientes');
+      setCurrentTab('clientes_agencia');
     } else if (type === 'campaign') {
       setCurrentTab('campanhas');
     }
@@ -67,6 +77,18 @@ function AppContent() {
     setIsNewLeadOpen(false);
   };
 
+  // If visitor is on the public registration page (?cadastro=empresa)
+  if (isPublicRegistration) {
+    return (
+      <PublicClientRegistrationView
+        onFinish={() => {
+          window.history.replaceState({}, '', window.location.pathname);
+          setIsPublicRegistration(false);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#080B14] text-[#F8FAFC] flex">
       {/* Sidebar Navigation */}
@@ -75,6 +97,7 @@ function AppContent() {
         setCurrentTab={setCurrentTab}
         isOpenMobile={isMobileMenuOpen}
         setIsOpenMobile={setIsMobileMenuOpen}
+        onOpenOnboardingModal={() => setIsOnboardingModalOpen(true)}
       />
 
       {/* Main Content Area */}
@@ -84,6 +107,7 @@ function AppContent() {
           onOpenSearch={() => setIsSearchOpen(true)}
           onOpenNewLead={() => setIsNewLeadOpen(true)}
           onOpenAiChat={() => setCurrentTab('raon_ai')}
+          onOpenOnboardingModal={() => setIsOnboardingModalOpen(true)}
         />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
@@ -109,13 +133,6 @@ function AppContent() {
           {/* EQUIPE RAON (SUPER ADMIN EXCLUSIVO) */}
           {currentTab === 'equipe' && (
             <TeamModule />
-          )}
-
-          {/* CLIENTES TENANTS ROUTE */}
-          {currentTab === 'clientes' && (
-            <ClientsModule
-              onNavigateTab={(tab) => setCurrentTab(tab)}
-            />
           )}
 
           {/* CRM ROUTE */}
@@ -169,6 +186,12 @@ function AppContent() {
           )}
         </main>
       </div>
+
+      {/* Modal: Cadastrar Novo Cliente / Link de Auto-Cadastro */}
+      <ClientOnboardingModal
+        isOpen={isOnboardingModalOpen}
+        onClose={() => setIsOnboardingModalOpen(false)}
+      />
 
       {/* Global Search Modal */}
       <GlobalSearchModal

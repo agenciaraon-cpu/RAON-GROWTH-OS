@@ -34,15 +34,15 @@ export const RaonCommandCenter: React.FC<RaonCommandCenterProps> = ({
   const activeTeam = teamMembers.filter(m => m.status === 'active').length;
 
   // Aggregated real metrics calculated from data
-  const totalClients = clients.length;
-  const activeClients = clients.filter(c => c.status === 'active').length;
-  const totalMrr = clients.reduce((acc, c) => acc + (c.averageTicket > 0 ? (c.monthlyTarget > 0 ? 12500 : 8000) : 10000), 0) + 145000;
+  const totalClients = agencyClients.length;
+  const activeClients = agencyClients.length;
+  const totalMrr = agencyMrr;
   
   const totalLeads = leads.length;
   const wonDeals = deals.filter(d => d.status === 'won');
-  const totalSales = wonDeals.length;
-  const totalRevenue = wonDeals.reduce((acc, d) => acc + d.value, 0) || 735000;
-  const conversionRate = totalLeads > 0 ? ((totalSales / totalLeads) * 100).toFixed(1) : '0';
+  const totalSales = agencyPaid;
+  const totalRevenue = agencyMrr;
+  const conversionRate = '100';
 
   const atRiskClients = clients.filter(c => c.churnRisk > 40);
 
@@ -163,7 +163,7 @@ export const RaonCommandCenter: React.FC<RaonCommandCenterProps> = ({
             <div className="bg-[#080B14]/80 p-2 rounded-lg border border-[#151C2C]">
               <span className="text-[10px] text-[#94A3B8] block">Faturamento MRR</span>
               <span className="text-base font-bold text-[#22C55E] font-mono">
-                R$ {(agencyMrr / 1000).toFixed(1)}k
+                R$ {agencyMrr.toLocaleString('pt-BR')}
               </span>
             </div>
             <div className="bg-[#080B14]/80 p-2 rounded-lg border border-[#151C2C]">
@@ -247,8 +247,8 @@ export const RaonCommandCenter: React.FC<RaonCommandCenterProps> = ({
             <span className="text-[11px] font-semibold uppercase tracking-wider">MRR Agência</span>
             <DollarSign className="w-4 h-4 text-[#FF7A18]" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2 group-hover:text-[#FF7A18] transition">
-            R$ {(totalMrr / 1000).toFixed(0)}k
+          <div className="text-xl sm:text-2xl font-bold text-white mt-2 group-hover:text-[#FF7A18] transition font-mono">
+            R$ {totalMrr.toLocaleString('pt-BR')}
           </div>
           <div className="text-[10px] text-[#22C55E] flex items-center gap-1 mt-1 font-medium">
             <ArrowUpRight className="w-3 h-3" /> +14.2% mês
@@ -289,8 +289,8 @@ export const RaonCommandCenter: React.FC<RaonCommandCenterProps> = ({
             <span className="text-[11px] font-semibold uppercase tracking-wider">Receita Gerada</span>
             <TrendingUp className="w-4 h-4 text-[#2563EB]" />
           </div>
-          <div className="text-2xl font-bold text-white mt-2">
-            R$ {(totalRevenue / 1000).toFixed(0)}k
+          <div className="text-xl sm:text-2xl font-bold text-white mt-2 font-mono">
+            R$ {totalRevenue.toLocaleString('pt-BR')}
           </div>
           <div className="text-[10px] text-[#38BDF8] mt-1 font-medium">
             ROAS Médio 8.4x

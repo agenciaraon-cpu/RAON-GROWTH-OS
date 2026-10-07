@@ -80,24 +80,63 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initial data bootstrap
   const [allClients, setAllClients] = useState<Client[]>(() => {
     const saved = localStorage.getItem('raon_data_clients');
-    return saved ? JSON.parse(saved) : DEMO_CLIENTS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const hasOldDemo = Array.isArray(parsed) && parsed.some(
+          (c: any) => c.name?.includes('Alpha Imóveis') || c.id === 'client-1'
+        );
+        if (hasOldDemo || parsed.length === 0) {
+          localStorage.setItem('raon_data_clients', JSON.stringify(DEMO_CLIENTS));
+          return DEMO_CLIENTS;
+        }
+        return parsed;
+      } catch (e) {
+        return DEMO_CLIENTS;
+      }
+    }
+    return DEMO_CLIENTS;
   });
 
   const [allLeads, setAllLeads] = useState<Lead[]>(() => {
     const saved = localStorage.getItem('raon_data_leads');
-    if (saved) return JSON.parse(saved);
-    return generateDemoLeads();
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const hasOldDemo = Array.isArray(parsed) && parsed.some((l: any) => l.clientId === 'client-1' || l.company?.includes('Participações'));
+        if (!hasOldDemo && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    const generated = generateDemoLeads();
+    localStorage.setItem('raon_data_leads', JSON.stringify(generated));
+    return generated;
   });
 
   const [allDeals, setAllDeals] = useState<Deal[]>(() => {
     const saved = localStorage.getItem('raon_data_deals');
-    if (saved) return JSON.parse(saved);
-    return generateDemoDeals(allLeads);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const hasOldDemo = Array.isArray(parsed) && parsed.some((d: any) => d.clientId === 'client-1' || d.title?.includes('Penthouse'));
+        if (!hasOldDemo && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    const generated = generateDemoDeals(allLeads);
+    localStorage.setItem('raon_data_deals', JSON.stringify(generated));
+    return generated;
   });
 
   const [allTasks, setAllTasks] = useState<Task[]>(() => {
     const saved = localStorage.getItem('raon_data_tasks');
-    return saved ? JSON.parse(saved) : DEMO_TASKS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const hasOldDemo = Array.isArray(parsed) && parsed.some((t: any) => t.clientId === 'client-1' || t.title?.includes('Penthouse'));
+        if (!hasOldDemo && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    localStorage.setItem('raon_data_tasks', JSON.stringify(DEMO_TASKS));
+    return DEMO_TASKS;
   });
 
   const [allActivities, setAllActivities] = useState<Activity[]>(() => {
@@ -110,24 +149,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         leadId: 'lead-1',
         type: 'contact',
         description: 'Primeiro contato realizado via WhatsApp. Cliente demonstrou alto interesse.',
-        userName: 'Roberto Lima (SDR)',
+        userName: 'Thiago Pinheiro (Super Admin)',
         createdAt: 'Hoje às 10:30',
-      },
-      {
-        id: 'act-2',
-        organizationId: 'org-raon',
-        leadId: 'lead-1',
-        type: 'proposal',
-        description: 'Proposta comercial preliminar enviada por e-mail no valor de R$ 75.000,00.',
-        userName: 'Paula Mendes (Closer)',
-        createdAt: 'Ontem às 16:15',
       },
     ];
   });
 
   const [allCampaigns, setAllCampaigns] = useState<Campaign[]>(() => {
     const saved = localStorage.getItem('raon_data_campaigns');
-    return saved ? JSON.parse(saved) : DEMO_CAMPAIGNS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const hasOldDemo = Array.isArray(parsed) && parsed.some((c: any) => c.clientId === 'client-1' || c.name?.includes('Alto Padrão'));
+        if (!hasOldDemo && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    localStorage.setItem('raon_data_campaigns', JSON.stringify(DEMO_CAMPAIGNS));
+    return DEMO_CAMPAIGNS;
   });
 
   const [allAutomations, setAllAutomations] = useState<Automation[]>(() => {
@@ -149,12 +187,43 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const [allAgencyClients, setAllAgencyClients] = useState<AgencyClient[]>(() => {
     const saved = localStorage.getItem('raon_data_agency_clients');
-    return saved ? JSON.parse(saved) : DEMO_AGENCY_CLIENTS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // If localStorage has old demo clients (e.g. ac-1, Clínica OdontoPrime), replace with real clients
+        const hasOldDemoData = Array.isArray(parsed) && parsed.some(
+          (c: any) => c.id?.startsWith('ac-') || c.companyName?.includes('OdontoPrime') || c.companyName?.includes('Alencar')
+        );
+        if (hasOldDemoData || parsed.length === 0) {
+          localStorage.setItem('raon_data_agency_clients', JSON.stringify(DEMO_AGENCY_CLIENTS));
+          return DEMO_AGENCY_CLIENTS;
+        }
+        return parsed;
+      } catch (e) {
+        return DEMO_AGENCY_CLIENTS;
+      }
+    }
+    return DEMO_AGENCY_CLIENTS;
   });
 
   const [allTeamMembers, setAllTeamMembers] = useState<TeamMember[]>(() => {
     const saved = localStorage.getItem('raon_data_team_members');
-    return saved ? JSON.parse(saved) : DEMO_TEAM_MEMBERS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        const hasOldClients = Array.isArray(parsed) && parsed.some(
+          (t: any) => t.assignedClientNames?.includes('Clínica OdontoPrime')
+        );
+        if (hasOldClients) {
+          localStorage.setItem('raon_data_team_members', JSON.stringify(DEMO_TEAM_MEMBERS));
+          return DEMO_TEAM_MEMBERS;
+        }
+        return parsed;
+      } catch (e) {
+        return DEMO_TEAM_MEMBERS;
+      }
+    }
+    return DEMO_TEAM_MEMBERS;
   });
 
   // Save to localStorage on change

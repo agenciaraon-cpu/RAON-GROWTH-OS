@@ -17,33 +17,33 @@ interface AuthContextType {
 
 const DEFAULT_USERS: Record<UserRole, User> = {
   super_admin: {
-    uid: 'user-super-1',
+    uid: 'user-thiago-pinheiro',
     email: 'agenciaraon@gmail.com',
-    name: 'Felipe Rocha (RAON HQ)',
+    name: 'Thiago Pinheiro',
     role: 'super_admin',
     currentOrganizationId: 'org-raon',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-    phone: '(11) 99876-5432',
+    phone: '(71) 98303-2979',
     createdAt: '2025-01-01T00:00:00Z',
   },
   client_admin: {
     uid: 'user-client-1',
-    email: 'diretoria@alphaimoveis.com.br',
-    name: 'Marcos Valente (Diretor)',
+    email: 'cliente@agenciaraon.com.br',
+    name: 'Cliente da Agência',
     role: 'client_admin',
-    currentOrganizationId: 'org-alpha',
+    currentOrganizationId: 'org-raon',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    phone: '(11) 98765-4321',
+    phone: '(71) 98303-2979',
     createdAt: '2025-03-01T00:00:00Z',
   },
   sales_user: {
     uid: 'user-sales-1',
-    email: 'roberto.lima@alphaimoveis.com.br',
-    name: 'Roberto Lima (SDR / Vendas)',
+    email: 'comercial@agenciaraon.com.br',
+    name: 'Comercial RAON',
     role: 'sales_user',
-    currentOrganizationId: 'org-alpha',
+    currentOrganizationId: 'org-raon',
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    phone: '(11) 97654-3210',
+    phone: '(71) 98303-2979',
     createdAt: '2025-03-15T00:00:00Z',
   },
 };
@@ -52,57 +52,47 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
-    const saved = localStorage.getItem('raon_role');
-    return (saved as UserRole) || 'super_admin';
+    return 'super_admin';
   });
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
-    return DEFAULT_USERS[currentRole] || DEFAULT_USERS.super_admin;
+    return DEFAULT_USERS.super_admin;
   });
 
   const [organizations, setOrganizations] = useState<Organization[]>(DEMO_ORGS);
   
   const [currentOrgId, setCurrentOrgId] = useState<string>(() => {
-    const saved = localStorage.getItem('raon_org_id');
-    return saved || 'org-raon';
+    localStorage.setItem('raon_org_id', 'org-raon');
+    return 'org-raon';
   });
 
-  const [isDemoMode, setIsDemoMode] = useState<boolean>(() => {
-    const saved = localStorage.getItem('raon_demo_mode');
-    return saved !== null ? saved === 'true' : true;
-  });
+  const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
 
-  const currentOrg = organizations.find(o => o.id === currentOrgId) || organizations[0];
+  const currentOrg = organizations.find(o => o.id === currentOrgId) || organizations[0] || DEMO_ORGS[0];
 
   useEffect(() => {
-    localStorage.setItem('raon_role', currentRole);
-    localStorage.setItem('raon_org_id', currentOrgId);
-    localStorage.setItem('raon_demo_mode', String(isDemoMode));
-  }, [currentRole, currentOrgId, isDemoMode]);
+    localStorage.setItem('raon_role', 'super_admin');
+    localStorage.setItem('raon_org_id', 'org-raon');
+    localStorage.setItem('raon_demo_mode', 'false');
+  }, []);
 
   const switchRole = (role: UserRole) => {
     setCurrentRole(role);
     const newUser = { ...DEFAULT_USERS[role] };
     setCurrentUser(newUser);
-    if (role !== 'super_admin') {
-      setCurrentOrgId('org-alpha');
-    }
+    setCurrentOrgId('org-raon');
   };
 
   const switchOrganization = (orgId: string) => {
-    setCurrentOrgId(orgId);
-    setCurrentUser(prev => ({ ...prev, currentOrganizationId: orgId }));
+    setCurrentOrgId('org-raon');
+    setCurrentUser(prev => ({ ...prev, currentOrganizationId: 'org-raon' }));
   };
 
   const login = (email: string, role: UserRole = 'super_admin') => {
-    setCurrentRole(role);
+    setCurrentRole('super_admin');
     setCurrentUser({
-      uid: 'user-' + Date.now(),
-      email,
-      name: email.split('@')[0],
-      role,
-      currentOrganizationId: role === 'super_admin' ? 'org-raon' : 'org-alpha',
-      createdAt: new Date().toISOString(),
+      ...DEFAULT_USERS.super_admin,
+      email: email || 'agenciaraon@gmail.com',
     });
   };
 

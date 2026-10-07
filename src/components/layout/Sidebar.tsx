@@ -2,8 +2,8 @@ import React from 'react';
 import { 
   LayoutDashboard, Users, Flame, CheckSquare, 
   Megaphone, Workflow, FileSpreadsheet, Bot, 
-  Share2, DollarSign, Settings, Building2, ChevronDown, 
-  ShieldCheck, ShieldAlert, Sparkles, LogOut, ArrowRightLeft
+  Share2, DollarSign, Settings, Building2, UserPlus,
+  ShieldCheck, Sparkles, LogOut
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -11,7 +11,7 @@ export type NavItem =
   | 'dashboard'
   | 'clientes_agencia'
   | 'equipe'
-  | 'clientes'
+  | 'cadastro_empresa'
   | 'crm'
   | 'tarefas'
   | 'campanhas'
@@ -28,16 +28,17 @@ interface SidebarProps {
   setCurrentTab: (tab: NavItem) => void;
   isOpenMobile: boolean;
   setIsOpenMobile: (open: boolean) => void;
+  onOpenOnboardingModal?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
   currentTab, 
   setCurrentTab, 
   isOpenMobile, 
-  setIsOpenMobile 
+  setIsOpenMobile,
+  onOpenOnboardingModal
 }) => {
-  const { currentUser, currentRole, currentOrg, organizations, switchOrganization, switchRole, logout } = useAuth();
-  const [orgDropdownOpen, setOrgDropdownOpen] = React.useState(false);
+  const { currentUser, currentRole, currentOrg, logout } = useAuth();
 
   const menuItems: { id: NavItem; label: string; icon: React.ReactNode; badge?: string; superAdminOnly?: boolean }[] = [
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
@@ -49,6 +50,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       superAdminOnly: true 
     },
     { 
+      id: 'cadastro_empresa', 
+      label: 'Cadastrar Empresa (Link)', 
+      icon: <UserPlus className="w-4 h-4 text-[#22C55E]" />, 
+      badge: 'Convite',
+      superAdminOnly: true 
+    },
+    { 
       id: 'equipe', 
       label: 'Equipe RAON', 
       icon: <Users className="w-4 h-4 text-[#38BDF8]" />, 
@@ -56,7 +64,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       superAdminOnly: true 
     },
     { id: 'crm', label: 'CRM & Pipeline', icon: <Flame className="w-4 h-4" />, badge: 'Pro' },
-    { id: 'clientes', label: 'Tenants / Empresas', icon: <Building2 className="w-4 h-4" /> },
     { id: 'tarefas', label: 'Tarefas', icon: <CheckSquare className="w-4 h-4" /> },
     { id: 'campanhas', label: 'Campanhas', icon: <Megaphone className="w-4 h-4" /> },
     { id: 'automacoes', label: 'Automações', icon: <Workflow className="w-4 h-4" /> },
@@ -65,11 +72,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     { id: 'raon_ai', label: 'RAON AI', icon: <Bot className="w-4 h-4 text-[#38BDF8]" />, badge: 'IA 360°' },
     { id: 'integracoes', label: 'Integrações', icon: <Share2 className="w-4 h-4" /> },
     { id: 'financeiro', label: 'Financeiro', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'configuracoes', label: 'Configurações & Auditoria', icon: <Settings className="w-4 h-4" /> },
+    { id: 'configuracoes', label: 'Configurações', icon: <Settings className="w-4 h-4" /> },
   ];
 
   const handleSelect = (id: NavItem) => {
-    setCurrentTab(id);
+    if (id === 'cadastro_empresa') {
+      if (onOpenOnboardingModal) {
+        onOpenOnboardingModal();
+      } else {
+        setCurrentTab('cadastro_empresa');
+      }
+    } else {
+      setCurrentTab(id);
+    }
     setIsOpenMobile(false);
   };
 
@@ -107,53 +122,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
 
-          {/* Tenant Switcher Card */}
-          <div className="mt-3 relative">
-            <button
-              onClick={() => setOrgDropdownOpen(!orgDropdownOpen)}
-              className="w-full flex items-center justify-between p-2 rounded-lg bg-[#080B14]/70 border border-[#151C2C] hover:border-[#38BDF8]/40 transition text-left group"
-            >
+          {/* SÓ A RAON MATRIZ: Fixa & Exclusiva com Botão de Cadastro de Empresa */}
+          <div className="mt-3 p-3 rounded-xl bg-[#080B14]/80 border border-[#2563EB]/30 space-y-2">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 overflow-hidden">
-                <div className="w-2 h-2 rounded-full bg-[#22C55E] shrink-0 animate-pulse" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E] shrink-0 animate-pulse" />
                 <div className="truncate">
-                  <div className="text-xs font-semibold text-white truncate group-hover:text-[#38BDF8] transition">
-                    {currentOrg.name}
+                  <div className="text-xs font-extrabold text-white truncate">
+                    RAON Matriz — Growth OS
                   </div>
-                  <div className="text-[10px] text-[#94A3B8] truncate">
-                    Plano {currentOrg.plan}
+                  <div className="text-[10px] text-[#22C55E] font-mono">
+                    Matriz Oficial
                   </div>
                 </div>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-[#94A3B8] group-hover:text-white shrink-0 ml-1" />
-            </button>
+              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#FF7A18]/20 text-[#FF9F43] border border-[#FF7A18]/30 shrink-0">
+                HQ
+              </span>
+            </div>
 
-            {/* Switcher dropdown */}
-            {orgDropdownOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-[#151C2C] border border-[#2563EB]/40 rounded-lg shadow-2xl p-1 z-50">
-                <div className="px-2 py-1 text-[10px] font-semibold text-[#94A3B8] uppercase tracking-wider">
-                  Trocar Organização / Cliente
-                </div>
-                {organizations.map(org => (
-                  <button
-                    key={org.id}
-                    onClick={() => {
-                      switchOrganization(org.id);
-                      setOrgDropdownOpen(false);
-                    }}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-xs text-left transition ${
-                      org.id === currentOrg.id 
-                        ? 'bg-[#2563EB]/20 text-[#38BDF8] font-semibold' 
-                        : 'text-[#94A3B8] hover:bg-[#101522] hover:text-white'
-                    }`}
-                  >
-                    <span className="truncate">{org.name}</span>
-                    <span className="text-[10px] text-[#94A3B8] shrink-0 font-mono ml-2">
-                      {org.segment.slice(0, 8)}
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
+            <button
+              onClick={() => onOpenOnboardingModal && onOpenOnboardingModal()}
+              className="w-full py-1.5 px-2 rounded-lg bg-linear-to-r from-[#FF7A18]/20 to-[#FF9F43]/20 hover:from-[#FF7A18]/30 hover:to-[#FF9F43]/30 border border-[#FF7A18]/40 text-[#FF9F43] hover:text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
+            >
+              <UserPlus className="w-3.5 h-3.5 text-[#FF7A18]" />
+              <span>+ Cadastrar Empresa (Link)</span>
+            </button>
           </div>
         </div>
 
@@ -163,7 +157,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <Sparkles className="w-3 h-3 text-[#FF7A18]" />
             MÉTODO RAON 360°
           </span>
-          <span className="text-[10px] text-[#38BDF8] bg-[#38BDF8]/10 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] text-[#22C55E] bg-[#22C55E]/10 px-1.5 py-0.5 rounded font-mono font-semibold">
             Ativo
           </span>
         </div>
@@ -190,7 +184,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
                 {item.badge && (
                   <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold ${
-                    item.badge === 'IA 360°'
+                    item.badge === 'Contratos' || item.badge === 'Convite'
+                      ? 'bg-[#FF7A18]/20 text-[#FF9F43] border border-[#FF7A18]/30'
+                      : item.badge === 'IA 360°'
                       ? 'bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30'
                       : 'bg-[#151C2C] text-[#94A3B8]'
                   }`}>
@@ -202,56 +198,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
           })}
         </nav>
 
-        {/* Footer: User profile & quick role switch */}
+        {/* Footer: Perfil Único Super Admin — Thiago Pinheiro */}
         <div className="p-3 border-t border-[#151C2C] bg-[#080B14]/80">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-[#101522] border border-[#151C2C]">
-            <div className="flex items-center gap-2 overflow-hidden">
-              <img 
-                src={currentUser.avatar} 
-                alt={currentUser.name} 
-                className="w-7 h-7 rounded-full object-cover border border-[#2563EB]/30 shrink-0" 
-              />
+          <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#101522] border border-[#151C2C]">
+            <div className="flex items-center gap-2.5 overflow-hidden">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#FF7A18] to-[#2563EB] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-md">
+                TP
+              </div>
               <div className="truncate">
-                <div className="text-xs font-semibold text-white truncate">
-                  {currentUser.name}
+                <div className="text-xs font-bold text-white truncate">
+                  Thiago Pinheiro
                 </div>
-                <div className="text-[10px] text-[#94A3B8] uppercase tracking-wider font-mono flex items-center gap-1">
-                  {currentRole === 'super_admin' ? (
-                    <span className="text-[#FF9F43] flex items-center gap-0.5">
-                      <ShieldCheck className="w-2.5 h-2.5" /> SUPER ADMIN
-                    </span>
-                  ) : currentRole === 'client_admin' ? (
-                    <span className="text-[#38BDF8] flex items-center gap-0.5">
-                      <ShieldAlert className="w-2.5 h-2.5" /> CLIENT ADMIN
-                    </span>
-                  ) : (
-                    <span className="text-[#22C55E]">SALES USER</span>
-                  )}
+                <div className="text-[10px] text-[#FF9F43] uppercase tracking-wider font-mono flex items-center gap-1 font-bold">
+                  <ShieldCheck className="w-3 h-3 text-[#FF9F43]" />
+                  SUPER ADMIN
                 </div>
               </div>
-            </div>
-            
-            {/* Quick role switch trigger */}
-            <div className="flex items-center gap-1">
-              <button
-                title="Alternar Perfil (Simulação de Perfil)"
-                onClick={() => {
-                  const nextRole = 
-                    currentRole === 'super_admin' ? 'client_admin' : 
-                    currentRole === 'client_admin' ? 'sales_user' : 'super_admin';
-                  switchRole(nextRole);
-                }}
-                className="p-1.5 rounded text-[#94A3B8] hover:text-[#38BDF8] hover:bg-[#151C2C] transition"
-              >
-                <ArrowRightLeft className="w-3.5 h-3.5" />
-              </button>
-              <button
-                title="Sair / Reset"
-                onClick={logout}
-                className="p-1.5 rounded text-[#94A3B8] hover:text-[#EF4444] hover:bg-[#151C2C] transition"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
         </div>
