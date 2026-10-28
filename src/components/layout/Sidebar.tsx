@@ -1,223 +1,251 @@
 import React from 'react';
 import { 
-  LayoutDashboard, Users, Flame, CheckSquare, 
-  Megaphone, Workflow, FileSpreadsheet, Bot, 
-  Share2, DollarSign, Settings, Building2, UserPlus,
-  ShieldCheck, Sparkles, LogOut
+  LayoutDashboard, ShoppingCart, ShoppingBag, Package, 
+  Boxes, Users, CreditCard, DollarSign, Wallet, 
+  Receipt, ClipboardList, Globe, FileText, Truck, 
+  UserCheck, BarChart3, Settings, User, ShieldAlert, 
+  HelpCircle, ChevronLeft, ChevronRight, Store, Sparkles
 } from 'lucide-react';
+import { AppNavigationRoute, RoleCode } from '../../types';
 import { useAuth } from '../../context/AuthContext';
 
-export type NavItem = 
-  | 'dashboard'
-  | 'clientes_agencia'
-  | 'equipe'
-  | 'cadastro_empresa'
-  | 'crm'
-  | 'tarefas'
-  | 'campanhas'
-  | 'automacoes'
-  | 'paginas_formularios'
-  | 'relatorios'
-  | 'raon_ai'
-  | 'integracoes'
-  | 'financeiro'
-  | 'configuracoes';
-
 interface SidebarProps {
-  currentTab: NavItem;
-  setCurrentTab: (tab: NavItem) => void;
-  isOpenMobile: boolean;
-  setIsOpenMobile: (open: boolean) => void;
-  onOpenOnboardingModal?: () => void;
+  currentRoute: AppNavigationRoute;
+  onRouteChange: (route: AppNavigationRoute) => void;
+  collapsed: boolean;
+  onToggleCollapse: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
-  currentTab, 
-  setCurrentTab, 
-  isOpenMobile, 
-  setIsOpenMobile,
-  onOpenOnboardingModal
-}) => {
-  const { currentUser, currentRole, currentOrg, logout } = useAuth();
+interface NavItem {
+  id: AppNavigationRoute;
+  label: string;
+  icon: React.ElementType;
+  badge?: string;
+  badgeType?: 'primary' | 'warning' | 'soon';
+  requiredRoles?: RoleCode[];
+  adminOnly?: boolean;
+}
 
-  const menuItems: { id: NavItem; label: string; icon: React.ReactNode; badge?: string; superAdminOnly?: boolean }[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
-    { 
-      id: 'clientes_agencia', 
-      label: 'Clientes da Agência', 
-      icon: <Building2 className="w-4 h-4 text-[#FF7A18]" />, 
-      badge: 'Contratos',
-      superAdminOnly: true 
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentRoute,
+  onRouteChange,
+  collapsed,
+  onToggleCollapse,
+}) => {
+  const { currentTenant, currentMemberRole, isPlatformAdmin, hasRole } = useAuth();
+
+  const navigationGroups: NavGroup[] = [
+    {
+      title: 'PRINCIPAL',
+      items: [
+        { id: 'overview', label: 'Visão Geral', icon: LayoutDashboard },
+      ],
     },
-    { 
-      id: 'cadastro_empresa', 
-      label: 'Cadastrar Empresa (Link)', 
-      icon: <UserPlus className="w-4 h-4 text-[#22C55E]" />, 
-      badge: 'Convite',
-      superAdminOnly: true 
+    {
+      title: 'OPERAÇÕES COMERCIAIS',
+      items: [
+        { id: 'pos', label: 'Frente de Caixa / PDV', icon: ShoppingCart, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'sales', label: 'Vendas', icon: ShoppingBag, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'products', label: 'Produtos', icon: Package, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'stock', label: 'Estoque', icon: Boxes, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'clients', label: 'Clientes', icon: Users, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'credit', label: 'Vendas a Prazo', icon: CreditCard, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, badge: 'Etapa 2', badgeType: 'soon' },
+      ],
     },
-    { 
-      id: 'equipe', 
-      label: 'Equipe RAON', 
-      icon: <Users className="w-4 h-4 text-[#38BDF8]" />, 
-      badge: 'Time',
-      superAdminOnly: true 
+    {
+      title: 'GESTÃO & CONTROLE',
+      items: [
+        { id: 'finance', label: 'Financeiro', icon: Wallet, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'expenses', label: 'Despesas', icon: Receipt, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'inventory', label: 'Inventário', icon: ClipboardList, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'online_catalog', label: 'Catálogo Online', icon: Globe, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'quotes', label: 'Cotações', icon: FileText, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'deliveries', label: 'Entregas', icon: Truck, badge: 'Etapa 2', badgeType: 'soon' },
+      ],
     },
-    { id: 'crm', label: 'CRM & Pipeline', icon: <Flame className="w-4 h-4" />, badge: 'Pro' },
-    { id: 'tarefas', label: 'Tarefas', icon: <CheckSquare className="w-4 h-4" /> },
-    { id: 'campanhas', label: 'Campanhas', icon: <Megaphone className="w-4 h-4" /> },
-    { id: 'automacoes', label: 'Automações', icon: <Workflow className="w-4 h-4" /> },
-    { id: 'paginas_formularios', label: 'Landing Pages & Forms', icon: <FileSpreadsheet className="w-4 h-4" /> },
-    { id: 'relatorios', label: 'Relatórios', icon: <Share2 className="w-4 h-4" /> },
-    { id: 'raon_ai', label: 'RAON AI', icon: <Bot className="w-4 h-4 text-[#38BDF8]" />, badge: 'IA 360°' },
-    { id: 'integracoes', label: 'Integrações', icon: <Share2 className="w-4 h-4" /> },
-    { id: 'financeiro', label: 'Financeiro', icon: <DollarSign className="w-4 h-4" /> },
-    { id: 'configuracoes', label: 'Configurações', icon: <Settings className="w-4 h-4" /> },
+    {
+      title: 'EMPRESA & CONFIGURAÇÕES',
+      items: [
+        { 
+          id: 'team', 
+          label: 'Equipe & Permissões', 
+          icon: UserCheck, 
+          badge: 'Etapa 1', 
+          badgeType: 'primary',
+          requiredRoles: ['owner', 'manager'] 
+        },
+        { 
+          id: 'settings', 
+          label: 'Configurações da Empresa', 
+          icon: Settings, 
+          badge: 'Etapa 1', 
+          badgeType: 'primary',
+          requiredRoles: ['owner', 'manager'] 
+        },
+        { id: 'reports', label: 'Relatórios', icon: BarChart3, badge: 'Etapa 2', badgeType: 'soon' },
+      ],
+    },
+    {
+      title: 'CONTA & SISTEMA',
+      items: [
+        { id: 'profile', label: 'Meu Perfil', icon: User },
+        { 
+          id: 'raon_admin', 
+          label: 'Painel RAON Admin', 
+          icon: ShieldAlert, 
+          badge: 'SuperAdmin',
+          badgeType: 'warning',
+          adminOnly: true 
+        },
+        { id: 'support', label: 'Ajuda & Suporte', icon: HelpCircle },
+      ],
+    },
   ];
 
-  const handleSelect = (id: NavItem) => {
-    if (id === 'cadastro_empresa') {
-      if (onOpenOnboardingModal) {
-        onOpenOnboardingModal();
-      } else {
-        setCurrentTab('cadastro_empresa');
-      }
-    } else {
-      setCurrentTab(id);
-    }
-    setIsOpenMobile(false);
-  };
-
   return (
-    <>
-      {/* Mobile backdrop */}
-      {isOpenMobile && (
-        <div 
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-xs" 
-          onClick={() => setIsOpenMobile(false)}
-        />
-      )}
-
-      <aside className={`
-        fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#101522] border-r border-[#151C2C] flex flex-col
-        transition-transform duration-200 ease-in-out
-        ${isOpenMobile ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
-        {/* Brand Header */}
-        <div className="p-4 border-b border-[#151C2C]">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-linear-to-br from-[#FF7A18] to-[#2563EB] flex items-center justify-center shadow-lg shadow-[#FF7A18]/20 font-black text-white text-base tracking-wider">
+    <aside 
+      className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out border-r flex flex-col justify-between ${
+        collapsed ? 'w-20' : 'w-72'
+      } bg-[#FFFFFF] dark:bg-[#0B1225] border-slate-200 dark:border-slate-800/80 shadow-xs`}
+    >
+      {/* Brand Header */}
+      <div>
+        <div className="h-18 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-800/60">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#345CF3] to-[#8065E9] flex items-center justify-center text-white font-extrabold text-lg shrink-0 shadow-md shadow-[#345CF3]/20">
               R
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-bold text-base tracking-tight text-white">RAON</span>
-                <span className="text-xs px-1.5 py-0.5 rounded font-mono font-bold bg-[#FF7A18]/20 text-[#FF9F43] border border-[#FF7A18]/30">
-                  GROWTH OS
-                </span>
+            {!collapsed && (
+              <div className="truncate">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-base">
+                    RAON
+                  </span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#345CF3]/10 text-[#345CF3] dark:bg-[#345CF3]/20 dark:text-[#345CF3] uppercase tracking-wider">
+                    System
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 dark:text-slate-400 truncate max-w-[170px]">
+                  Sua empresa. Seu controle.
+                </p>
               </div>
-              <p className="text-[10px] text-[#94A3B8] font-medium tracking-wide">
-                Marketing, IA & Tecnologia
+            )}
+          </div>
+
+          <button
+            onClick={onToggleCollapse}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
+            title={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
+          >
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {/* Current Tenant Badge (if expanded) */}
+        {!collapsed && currentTenant && (
+          <div className="mx-3 my-3 p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/60 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-[#17B897]/15 text-[#17B897] flex items-center justify-center shrink-0">
+              <Store className="w-3.5 h-3.5" />
+            </div>
+            <div className="truncate flex-1">
+              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-400 uppercase tracking-wider block">
+                Empresa Ativa
+              </span>
+              <p className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                {currentTenant.name}
               </p>
             </div>
           </div>
+        )}
+      </div>
 
-          {/* SÓ A RAON MATRIZ: Fixa & Exclusiva com Botão de Cadastro de Empresa */}
-          <div className="mt-3 p-3 rounded-xl bg-[#080B14]/80 border border-[#2563EB]/30 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 overflow-hidden">
-                <div className="w-2.5 h-2.5 rounded-full bg-[#22C55E] shrink-0 animate-pulse" />
-                <div className="truncate">
-                  <div className="text-xs font-extrabold text-white truncate">
-                    RAON Matriz — Growth OS
-                  </div>
-                  <div className="text-[10px] text-[#22C55E] font-mono">
-                    Matriz Oficial
-                  </div>
+      {/* Navigation Items (Scrollable) */}
+      <div className="flex-1 overflow-y-auto px-3 py-2 space-y-4">
+        {navigationGroups.map((group, gIdx) => {
+          // Filter items based on user role and admin status
+          const visibleItems = group.items.filter(item => {
+            if (item.adminOnly && !isPlatformAdmin) return false;
+            if (item.requiredRoles && !hasRole(item.requiredRoles)) return false;
+            return true;
+          });
+
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div key={gIdx} className="space-y-1">
+              {!collapsed && (
+                <div className="px-3 text-[10px] font-bold text-slate-400 dark:text-slate-400 tracking-wider uppercase mb-1">
+                  {group.title}
                 </div>
-              </div>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-[#FF7A18]/20 text-[#FF9F43] border border-[#FF7A18]/30 shrink-0">
-                HQ
-              </span>
+              )}
+
+              {visibleItems.map(item => {
+                const Icon = item.icon;
+                const isActive = currentRoute === item.id;
+
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => onRouteChange(item.id)}
+                    title={collapsed ? item.label : undefined}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all group relative ${
+                      isActive
+                        ? 'bg-[#345CF3] text-white shadow-sm shadow-[#345CF3]/30 font-semibold'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50'
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 shrink-0 transition ${
+                      isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200'
+                    }`} />
+
+                    {!collapsed && (
+                      <span className="truncate flex-1 text-left">
+                        {item.label}
+                      </span>
+                    )}
+
+                    {!collapsed && item.badge && (
+                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 uppercase tracking-wider ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : item.badgeType === 'primary'
+                          ? 'bg-[#345CF3]/10 text-[#345CF3] dark:bg-[#345CF3]/20 dark:text-[#38BDF8]'
+                          : item.badgeType === 'warning'
+                          ? 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'
+                          : 'bg-slate-200/70 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                      }`}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
+          );
+        })}
+      </div>
 
-            <button
-              onClick={() => onOpenOnboardingModal && onOpenOnboardingModal()}
-              className="w-full py-1.5 px-2 rounded-lg bg-linear-to-r from-[#FF7A18]/20 to-[#FF9F43]/20 hover:from-[#FF7A18]/30 hover:to-[#FF9F43]/30 border border-[#FF7A18]/40 text-[#FF9F43] hover:text-white text-[11px] font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
-            >
-              <UserPlus className="w-3.5 h-3.5 text-[#FF7A18]" />
-              <span>+ Cadastrar Empresa (Link)</span>
-            </button>
+      {/* Footer Info */}
+      <div className="p-3 border-t border-slate-100 dark:border-slate-800/60">
+        {!collapsed ? (
+          <div className="px-2 py-1 text-center">
+            <span className="text-[10px] text-slate-400 dark:text-slate-400 block font-medium">
+              RAON System • v1.0.0 (Etapa 1)
+            </span>
+            <span className="text-[9px] text-[#17B897] font-semibold">
+              Ambiente Seguro • PostgreSQL
+            </span>
           </div>
-        </div>
-
-        {/* Method Banner Pill */}
-        <div className="px-4 py-2 border-b border-[#151C2C] bg-[#080B14]/40 flex items-center justify-between text-[11px] text-[#94A3B8]">
-          <span className="font-semibold text-white flex items-center gap-1.5">
-            <Sparkles className="w-3 h-3 text-[#FF7A18]" />
-            MÉTODO RAON 360°
-          </span>
-          <span className="text-[10px] text-[#22C55E] bg-[#22C55E]/10 px-1.5 py-0.5 rounded font-mono font-semibold">
-            Ativo
-          </span>
-        </div>
-
-        {/* Navigation items list */}
-        <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-          {menuItems.map(item => {
-            const isActive = currentTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleSelect(item.id)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                  isActive
-                    ? 'bg-linear-to-r from-[#2563EB]/25 to-[#38BDF8]/10 text-white border-l-2 border-[#FF7A18] font-semibold shadow-xs'
-                    : 'text-[#94A3B8] hover:text-white hover:bg-[#151C2C]/60'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className={isActive ? 'text-[#38BDF8]' : 'text-[#94A3B8]'}>
-                    {item.icon}
-                  </span>
-                  <span>{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono font-semibold ${
-                    item.badge === 'Contratos' || item.badge === 'Convite'
-                      ? 'bg-[#FF7A18]/20 text-[#FF9F43] border border-[#FF7A18]/30'
-                      : item.badge === 'IA 360°'
-                      ? 'bg-[#38BDF8]/15 text-[#38BDF8] border border-[#38BDF8]/30'
-                      : 'bg-[#151C2C] text-[#94A3B8]'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Footer: Perfil Único Super Admin — Thiago Pinheiro */}
-        <div className="p-3 border-t border-[#151C2C] bg-[#080B14]/80">
-          <div className="flex items-center justify-between p-2.5 rounded-xl bg-[#101522] border border-[#151C2C]">
-            <div className="flex items-center gap-2.5 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-linear-to-br from-[#FF7A18] to-[#2563EB] flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-md">
-                TP
-              </div>
-              <div className="truncate">
-                <div className="text-xs font-bold text-white truncate">
-                  Thiago Pinheiro
-                </div>
-                <div className="text-[10px] text-[#FF9F43] uppercase tracking-wider font-mono flex items-center gap-1 font-bold">
-                  <ShieldCheck className="w-3 h-3 text-[#FF9F43]" />
-                  SUPER ADMIN
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </aside>
-    </>
+        ) : (
+          <div className="w-2 h-2 rounded-full bg-[#17B897] mx-auto" title="RAON System Ativo" />
+        )}
+      </div>
+    </aside>
   );
 };

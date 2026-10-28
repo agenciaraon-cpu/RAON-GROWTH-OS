@@ -2,19 +2,16 @@
 
 @layer base {
   :root {
-    --bg-main: #080B14;
-    --surface-main: #101522;
-    --surface-secondary: #151C2C;
-    --raon-orange: #FF7A18;
-    --raon-orange-light: #FF9F43;
-    --digital-blue: #38BDF8;
-    --electric-blue: #2563EB;
+    --raon-night: #0B1225;
+    --raon-blue: #345CF3;
+    --raon-violet: #8065E9;
+    --raon-green: #17B897;
+    --raon-light-bg: #F3F6FB;
+    --raon-white: #FFFFFF;
   }
 
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #080B14;
-    color: #F8FAFC;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     overflow-x: hidden;
   }
 
@@ -24,13 +21,13 @@
     height: 6px;
   }
   ::-webkit-scrollbar-track {
-    background: #080B14;
+    background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: #1e293b;
+    background: rgba(148, 163, 184, 0.25);
     border-radius: 9999px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: rgba(148, 163, 184, 0.45);
   }
 }

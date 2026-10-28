@@ -1,227 +1,175 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { DataProvider, useData } from './context/DataContext';
-import { Sidebar, NavItem } from './components/layout/Sidebar';
+import { ThemeProvider } from './context/ThemeContext';
+import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
-import { RaonCommandCenter } from './components/dashboard/RaonCommandCenter';
-import { ClientDashboard } from './components/dashboard/ClientDashboard';
-import { ClientsModule } from './components/clients/ClientsModule';
-import { AgencyClientsModule } from './components/agency-clients/AgencyClientsModule';
-import { TeamModule } from './components/team/TeamModule';
-import { ClientOnboardingModal } from './components/clients/ClientOnboardingModal';
-import { PublicClientRegistrationView } from './components/clients/PublicClientRegistrationView';
-import { CrmModule } from './components/crm/CrmModule';
-import { TasksModule } from './components/tasks/TasksModule';
-import { CampaignsModule } from './components/campaigns/CampaignsModule';
-import { AutomationsModule } from './components/automations/AutomationsModule';
-import { PagesAndFormsModule } from './components/pages/PagesAndFormsModule';
-import { ReportsModule } from './components/reports/ReportsModule';
-import { RaonAiModule } from './components/ai/RaonAiModule';
-import { IntegrationsModule } from './components/integrations/IntegrationsModule';
-import { FinancialModule } from './components/financial/FinancialModule';
-import { SettingsModule } from './components/settings/SettingsModule';
-import { GlobalSearchModal } from './components/search/GlobalSearchModal';
-import { LeadModal } from './components/crm/LeadModal';
-import { LeadProfileDrawer } from './components/crm/LeadProfileDrawer';
-import { testConnection } from './lib/firebase';
-import { Lead } from './types';
+import { Breadcrumbs } from './components/layout/Breadcrumbs';
+
+// Features
+import { LoginView } from './features/auth/LoginView';
+import { RegisterView } from './features/auth/RegisterView';
+import { ForgotPasswordModal } from './features/auth/ForgotPasswordModal';
+import { OnboardingView } from './features/auth/OnboardingView';
+import { SupabaseSetupModal } from './features/auth/SupabaseSetupModal';
+
+import { DashboardOverview } from './features/dashboard/DashboardOverview';
+import { ProfileView } from './features/profile/ProfileView';
+import { CompanySettingsView } from './features/tenants/CompanySettingsView';
+import { CreateTenantModal } from './features/tenants/CreateTenantModal';
+import { TeamManagementView } from './features/team/TeamManagementView';
+import { RaonAdminView } from './features/admin/RaonAdminView';
+import { SupportView } from './features/support/SupportView';
+import { UnderConstructionView } from './features/future-modules/UnderConstructionView';
+
+import { AppNavigationRoute } from './types';
 
 function AppContent() {
-  const { currentRole, currentOrg } = useAuth();
-  const { addLead } = useData();
+  const { isAuthenticated, isLoading, userTenants, currentTenant } = useAuth();
 
-  const [currentTab, setCurrentTab] = useState<NavItem>('dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isNewLeadOpen, setIsNewLeadOpen] = useState(false);
-  const [isOnboardingModalOpen, setIsOnboardingModalOpen] = useState(false);
-  const [drawerLead, setDrawerLead] = useState<Lead | null>(null);
+  // Navigation route
+  const [currentRoute, setCurrentRoute] = useState<AppNavigationRoute>('overview');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Check if current URL is the public self-registration link for clients
-  const [isPublicRegistration, setIsPublicRegistration] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    const search = window.location.search;
-    return search.includes('cadastro=empresa') || search.includes('onboarding=novo_cliente');
-  });
+  // Auth sub-screens
+  const [authScreen, setAuthScreen] = useState<'login' | 'register'>('login');
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
+  const [isSupabaseSetupOpen, setIsSupabaseSetupOpen] = useState(false);
+  const [isCreateTenantOpen, setIsCreateTenantOpen] = useState(false);
 
-  // Global keydown listener for CTRL + K
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsSearchOpen(true);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  // Test Firebase connection on initial boot
-  useEffect(() => {
-    testConnection();
-  }, []);
-
-  const handleSearchResult = (type: string, item: any) => {
-    if (type === 'lead') {
-      setDrawerLead(item);
-      setCurrentTab('crm');
-    } else if (type === 'client') {
-      setCurrentTab('clientes_agencia');
-    } else if (type === 'campaign') {
-      setCurrentTab('campanhas');
-    }
-  };
-
-  const handleSaveLead = (leadData: Omit<Lead, 'id' | 'createdAt'>) => {
-    addLead(leadData);
-    setIsNewLeadOpen(false);
-  };
-
-  // If visitor is on the public registration page (?cadastro=empresa)
-  if (isPublicRegistration) {
+  // Loading state
+  if (isLoading) {
     return (
-      <PublicClientRegistrationView
-        onFinish={() => {
-          window.history.replaceState({}, '', window.location.pathname);
-          setIsPublicRegistration(false);
-        }}
-      />
+      <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#F3F6FB] dark:bg-[#0B1225] text-slate-800 dark:text-slate-100">
+        <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-[#345CF3] to-[#8065E9] flex items-center justify-center text-white font-extrabold text-2xl animate-pulse shadow-xl shadow-[#345CF3]/20 mb-4">
+          R
+        </div>
+        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+          Carregando ambiente RAON System...
+        </p>
+      </div>
     );
   }
 
+  // Not authenticated
+  if (!isAuthenticated) {
+    return (
+      <>
+        {authScreen === 'login' ? (
+          <LoginView
+            onSwitchToRegister={() => setAuthScreen('register')}
+            onOpenForgotPassword={() => setIsForgotPasswordOpen(true)}
+            onOpenSupabaseSetup={() => setIsSupabaseSetupOpen(true)}
+          />
+        ) : (
+          <RegisterView
+            onSwitchToLogin={() => setAuthScreen('login')}
+            onSuccessRegister={() => setAuthScreen('login')}
+          />
+        )}
+
+        <ForgotPasswordModal
+          isOpen={isForgotPasswordOpen}
+          onClose={() => setIsForgotPasswordOpen(false)}
+        />
+
+        <SupabaseSetupModal
+          isOpen={isSupabaseSetupOpen}
+          onClose={() => setIsSupabaseSetupOpen(false)}
+        />
+      </>
+    );
+  }
+
+  // First access check: user has no company created yet
+  if (userTenants.length === 0) {
+    return (
+      <OnboardingView onComplete={() => setCurrentRoute('overview')} />
+    );
+  }
+
+  // Render view by route
+  const renderCurrentView = () => {
+    switch (currentRoute) {
+      case 'overview':
+        return <DashboardOverview onNavigate={setCurrentRoute} />;
+      case 'profile':
+        return <ProfileView />;
+      case 'settings':
+        return <CompanySettingsView />;
+      case 'team':
+        return <TeamManagementView />;
+      case 'raon_admin':
+        return <RaonAdminView />;
+      case 'support':
+        return <SupportView />;
+      default:
+        return (
+          <UnderConstructionView
+            route={currentRoute}
+            onNavigateOverview={() => setCurrentRoute('overview')}
+          />
+        );
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#080B14] text-[#F8FAFC] flex">
-      {/* Sidebar Navigation */}
+    <div className="min-h-screen bg-[#F3F6FB] dark:bg-[#0B1225] text-slate-800 dark:text-slate-100 transition-colors duration-200">
+      {/* Sidebar */}
       <Sidebar
-        currentTab={currentTab}
-        setCurrentTab={setCurrentTab}
-        isOpenMobile={isMobileMenuOpen}
-        setIsOpenMobile={setIsMobileMenuOpen}
-        onOpenOnboardingModal={() => setIsOnboardingModalOpen(true)}
+        currentRoute={currentRoute}
+        onRouteChange={setCurrentRoute}
+        collapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
+      />
+
+      {/* Top Header */}
+      <Header
+        collapsed={sidebarCollapsed}
+        currentRoute={currentRoute}
+        onRouteChange={setCurrentRoute}
+        onOpenCreateTenant={() => setIsCreateTenantOpen(true)}
+        onOpenSupabaseAssistant={() => setIsSupabaseSetupOpen(true)}
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
-        <Header
-          onOpenMobile={() => setIsMobileMenuOpen(true)}
-          onOpenSearch={() => setIsSearchOpen(true)}
-          onOpenNewLead={() => setIsNewLeadOpen(true)}
-          onOpenAiChat={() => setCurrentTab('raon_ai')}
-          onOpenOnboardingModal={() => setIsOnboardingModalOpen(true)}
-        />
+      <main 
+        className={`pt-24 pb-12 px-6 sm:px-8 transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'ml-20' : 'ml-72'
+        }`}
+      >
+        <div className="max-w-7xl mx-auto">
+          <Breadcrumbs
+            currentRoute={currentRoute}
+            tenantName={currentTenant?.name}
+            onRouteChange={setCurrentRoute}
+          />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
-          {/* DASHBOARD ROUTE */}
-          {currentTab === 'dashboard' && (
-            currentRole === 'super_admin' && currentOrg.id === 'org-raon' ? (
-              <RaonCommandCenter
-                onNavigateTab={(tab) => setCurrentTab(tab)}
-              />
-            ) : (
-              <ClientDashboard
-                onNavigateTab={(tab) => setCurrentTab(tab)}
-                onOpenNewLead={() => setIsNewLeadOpen(true)}
-              />
-            )
-          )}
+          {renderCurrentView()}
+        </div>
+      </main>
 
-          {/* CLIENTES DA AGÊNCIA (SUPER ADMIN EXCLUSIVO) */}
-          {currentTab === 'clientes_agencia' && (
-            <AgencyClientsModule />
-          )}
-
-          {/* EQUIPE RAON (SUPER ADMIN EXCLUSIVO) */}
-          {currentTab === 'equipe' && (
-            <TeamModule />
-          )}
-
-          {/* CRM ROUTE */}
-          {currentTab === 'crm' && (
-            <CrmModule />
-          )}
-
-          {/* TAREFAS ROUTE */}
-          {currentTab === 'tarefas' && (
-            <TasksModule />
-          )}
-
-          {/* CAMPANHAS ROUTE */}
-          {currentTab === 'campanhas' && (
-            <CampaignsModule />
-          )}
-
-          {/* AUTOMAÇÕES ROUTE */}
-          {currentTab === 'automacoes' && (
-            <AutomationsModule />
-          )}
-
-          {/* LANDING PAGES & FORMS ROUTE */}
-          {currentTab === 'paginas_formularios' && (
-            <PagesAndFormsModule />
-          )}
-
-          {/* RELATÓRIOS ROUTE */}
-          {currentTab === 'relatorios' && (
-            <ReportsModule />
-          )}
-
-          {/* RAON AI ROUTE */}
-          {currentTab === 'raon_ai' && (
-            <RaonAiModule />
-          )}
-
-          {/* INTEGRAÇÕES ROUTE */}
-          {currentTab === 'integracoes' && (
-            <IntegrationsModule />
-          )}
-
-          {/* FINANCEIRO ROUTE */}
-          {currentTab === 'financeiro' && (
-            <FinancialModule />
-          )}
-
-          {/* CONFIGURAÇÕES ROUTE */}
-          {currentTab === 'configuracoes' && (
-            <SettingsModule />
-          )}
-        </main>
-      </div>
-
-      {/* Modal: Cadastrar Novo Cliente / Link de Auto-Cadastro */}
-      <ClientOnboardingModal
-        isOpen={isOnboardingModalOpen}
-        onClose={() => setIsOnboardingModalOpen(false)}
+      {/* Global Modals */}
+      <CreateTenantModal
+        isOpen={isCreateTenantOpen}
+        onClose={() => setIsCreateTenantOpen(false)}
       />
 
-      {/* Global Search Modal */}
-      <GlobalSearchModal
-        isOpen={isSearchOpen}
-        onClose={() => setIsSearchOpen(false)}
-        onSelectResult={handleSearchResult}
-      />
-
-      {/* Quick New Lead Modal */}
-      <LeadModal
-        isOpen={isNewLeadOpen}
-        onClose={() => setIsNewLeadOpen(false)}
-        onSave={handleSaveLead}
-      />
-
-      {/* Global Lead Profile Drawer */}
-      <LeadProfileDrawer
-        lead={drawerLead}
-        onClose={() => setDrawerLead(null)}
+      <SupabaseSetupModal
+        isOpen={isSupabaseSetupOpen}
+        onClose={() => setIsSupabaseSetupOpen(false)}
       />
     </div>
   );
 }
 
-export default function App() {
+export function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
+    <ThemeProvider>
+      <AuthProvider>
         <AppContent />
-      </DataProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
+
+export default App;
