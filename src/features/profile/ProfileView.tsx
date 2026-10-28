@@ -2,10 +2,11 @@ import React, { useState, useRef } from 'react';
 import { 
   User, Mail, Phone, Lock, Camera, Upload, 
   Trash2, Check, ShieldCheck, Sun, Moon, 
-  LogOut, AlertCircle, CheckCircle2, Sparkles
+  LogOut, AlertCircle, CheckCircle2, Sparkles, Palette
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { ColorThemePicker } from '../../components/common/ColorThemePicker';
 
 export const ProfileView: React.FC = () => {
   const { currentUser, updateProfile, logout, currentMemberRole, currentTenant } = useAuth();
@@ -388,6 +389,20 @@ export const ProfileView: React.FC = () => {
           >
             Alternar para Tema {theme === 'dark' ? 'Claro' : 'Escuro'}
           </button>
+        </div>
+
+        {/* Color Palette Choice */}
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2 mb-2">
+            <Palette className="w-4 h-4 text-app-primary" />
+            <span className="text-xs font-bold text-slate-900 dark:text-white">
+              Cores do Lucre+ (Personalização do seu usuário)
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mb-3">
+            Escolha entre as 5 cores (Verde Escuro, Rosa Choque, Preto, Laranja Ouro, Roxo) ou a cor padrão para colorir os destaques do seu painel:
+          </p>
+          <ColorThemePicker layout="row" showLabels={true} />
         </div>
 
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">

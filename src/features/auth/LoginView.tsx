@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Lock, Mail, Eye, EyeOff, ArrowRight, ShieldCheck, 
-  Store, Sparkles, CheckCircle2, AlertCircle, Database
+  Store, Sparkles, CheckCircle2, AlertCircle, Database, Palette
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { isSupabaseConfigured } from '../../lib/supabase';
+import { useTheme } from '../../context/ThemeContext';
+import { ColorThemePicker } from '../../components/common/ColorThemePicker';
 
 interface LoginViewProps {
   onSwitchToRegister: () => void;
@@ -18,14 +20,16 @@ export const LoginView: React.FC<LoginViewProps> = ({
   onOpenSupabaseSetup,
 }) => {
   const { login, isLoading } = useAuth();
+  const { colorThemeOption } = useTheme();
 
   const [email, setEmail] = useState(() => {
-    return localStorage.getItem('raon_remembered_email') || '';
+    return localStorage.getItem('lucre_remembered_email') || localStorage.getItem('raon_remembered_email') || '';
   });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberEmail, setRememberEmail] = useState(Boolean(localStorage.getItem('raon_remembered_email')));
+  const [rememberEmail, setRememberEmail] = useState(Boolean(localStorage.getItem('lucre_remembered_email') || localStorage.getItem('raon_remembered_email')));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,9 +41,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
     }
 
     if (rememberEmail) {
-      localStorage.setItem('raon_remembered_email', email.trim());
+      localStorage.setItem('lucre_remembered_email', email.trim());
     } else {
-      localStorage.removeItem('raon_remembered_email');
+      localStorage.removeItem('lucre_remembered_email');
     }
 
     const res = await login(email.trim(), password);
@@ -59,20 +63,23 @@ export const LoginView: React.FC<LoginViewProps> = ({
       {/* Left Institutional Branding Panel */}
       <div className="lg:w-1/2 p-8 sm:p-12 lg:p-16 flex flex-col justify-between bg-linear-to-br from-[#0B1225] via-[#101A38] to-[#0B1225] text-white relative overflow-hidden border-b lg:border-b-0 lg:border-r border-slate-800">
         {/* Glow ambient effects */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#345CF3]/10 rounded-full blur-3xl pointer-events-none" />
+        <div 
+          className="absolute top-0 right-0 w-96 h-96 rounded-full blur-3xl pointer-events-none opacity-20"
+          style={{ backgroundColor: colorThemeOption.hex }} 
+        />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#8065E9]/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Top Header */}
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-linear-to-tr from-[#345CF3] to-[#8065E9] flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#345CF3]/30">
-              R
+            <div className="w-11 h-11 rounded-2xl bg-app-gradient flex items-center justify-center text-white font-black text-xl shadow-lg shadow-app-glow">
+              L+
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-xl tracking-tight text-white">RAON</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[#345CF3]/30 text-[#38BDF8] uppercase tracking-wider">
-                  SYSTEM
+                <span className="font-extrabold text-2xl tracking-tight text-white">Lucre+</span>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-app-light text-app-primary uppercase tracking-wider border border-app-primary/30">
+                  SaaS Varejo
                 </span>
               </div>
               <p className="text-xs text-slate-400">
@@ -83,35 +90,56 @@ export const LoginView: React.FC<LoginViewProps> = ({
         </div>
 
         {/* Central Pitch */}
-        <div className="my-12 relative z-10 space-y-6 max-w-lg">
+        <div className="my-10 relative z-10 space-y-6 max-w-lg">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#17B897]/15 border border-[#17B897]/30 text-[#17B897] text-xs font-semibold">
             <ShieldCheck className="w-4 h-4" />
-            <span>Etapa 1: Plataforma SaaS Multi-Tenant com PostgreSQL</span>
+            <span>Gestão Comercial SaaS com PostgreSQL & Multi-Tenant</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
-            Gestão comercial inteligente e isolada para o seu varejo.
+            Mais vendas, controle total e máxima rentabilidade na sua loja.
           </h1>
 
           <p className="text-sm text-slate-300 leading-relaxed">
-            Desenvolvido pela <strong className="text-white">RAON — Marketing, IA & Tecnologia</strong> para lojas de roupas, calçados, cosméticos, eletrônicos e comércio varejista.
+            O <strong className="text-white">Lucre+</strong> foi desenvolvido para lojas de roupas, calçados, cosméticos, eletrônicos, variedades e comércios que buscam simplicidade operacional e segurança.
           </p>
 
-          <div className="grid grid-cols-2 gap-3 pt-2">
+          {/* Plano Fixo Card */}
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs flex items-center justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-app-primary block">
+                Plano Fixo Lucre+
+              </span>
+              <span className="text-sm font-extrabold text-white block">
+                Tudo incluso em um só lugar
+              </span>
+              <span className="text-[11px] text-slate-400">
+                PDV, Vendas, Estoque, Financeiro e Equipe
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-xl font-extrabold text-app-primary font-mono block">
+                R$ 29,90
+              </span>
+              <span className="text-[10px] text-slate-400">por mês</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 pt-1">
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs">
-              <span className="text-xs font-bold text-white block">Multi-Tenant Real</span>
+              <span className="text-xs font-bold text-white block">Multi-Tenant Seguro</span>
               <span className="text-[11px] text-slate-400">Isolamento rigoroso por empresa via RLS</span>
             </div>
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs">
-              <span className="text-xs font-bold text-[#17B897] block">Supabase Ready</span>
-              <span className="text-[11px] text-slate-400">PostgreSQL, Auth e Storage com migrations</span>
+              <span className="text-xs font-bold text-[#17B897] block">Supabase Conectado</span>
+              <span className="text-[11px] text-slate-400">PostgreSQL com migrações prontas</span>
             </div>
           </div>
         </div>
 
         {/* Footer info */}
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-400 border-t border-white/10 pt-4">
-          <span>RAON System v1.0.0</span>
+          <span>Lucre+ • v1.0.0</span>
           <span>Fuso: America/Bahia (BRL)</span>
         </div>
       </div>
@@ -119,14 +147,45 @@ export const LoginView: React.FC<LoginViewProps> = ({
       {/* Right Login Form */}
       <div className="lg:w-1/2 p-6 sm:p-12 lg:p-16 flex items-center justify-center">
         <div className="w-full max-w-md space-y-6">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-              Acesse sua conta
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              Informe suas credenciais para gerenciar sua empresa no RAON System.
-            </p>
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                Acesse o Lucre+
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Informe suas credenciais para gerenciar sua empresa comercial.
+              </p>
+            </div>
+
+            {/* Quick Color Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setShowColorPicker(!showColorPicker)}
+              title="Personalizar cor do app"
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+            >
+              <Palette className="w-4 h-4 text-app-primary" />
+              <span 
+                className="w-2.5 h-2.5 rounded-full" 
+                style={{ backgroundColor: colorThemeOption.hex }} 
+              />
+            </button>
           </div>
+
+          {/* Color Picker Drawer / Accordion */}
+          {showColorPicker && (
+            <div className="p-4 rounded-2xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-md animate-in fade-in space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-900 dark:text-white">
+                  Cores do Lucre+ (5 opções + padrão)
+                </span>
+                <span className="text-[10px] text-app-primary font-bold">
+                  {colorThemeOption.name}
+                </span>
+              </div>
+              <ColorThemePicker layout="row" showLabels={true} />
+            </div>
+          )}
 
           {/* Database indicator banner */}
           <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
@@ -138,7 +197,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
             </div>
             <button
               onClick={onOpenSupabaseSetup}
-              className="text-[11px] font-bold text-[#345CF3] hover:underline cursor-pointer"
+              className="text-[11px] font-bold text-app-primary hover:underline cursor-pointer"
             >
               Configurar
             </button>
@@ -166,7 +225,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   placeholder="seuemail@empresa.com.br"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#345CF3] outline-hidden transition shadow-xs"
+                  className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-app-primary outline-hidden transition shadow-xs"
                 />
               </div>
             </div>
@@ -179,7 +238,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 <button
                   type="button"
                   onClick={onOpenForgotPassword}
-                  className="text-xs font-medium text-[#345CF3] hover:underline"
+                  className="text-xs font-medium text-app-primary hover:underline"
                 >
                   Esqueci minha senha
                 </button>
@@ -193,7 +252,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#345CF3] outline-hidden transition shadow-xs font-mono"
+                  className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-app-primary outline-hidden transition shadow-xs font-mono"
                 />
                 <button
                   type="button"
@@ -212,7 +271,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 id="remember"
                 checked={rememberEmail}
                 onChange={e => setRememberEmail(e.target.checked)}
-                className="w-4 h-4 rounded text-[#345CF3] focus:ring-[#345CF3] border-slate-300 dark:border-slate-700"
+                className="w-4 h-4 rounded text-app-primary focus:ring-app-primary border-slate-300 dark:border-slate-700"
               />
               <label htmlFor="remember" className="text-xs text-slate-600 dark:text-slate-400 cursor-pointer">
                 Lembrar preferência de e-mail neste navegador
@@ -223,14 +282,14 @@ export const LoginView: React.FC<LoginViewProps> = ({
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-xl bg-linear-to-r from-[#345CF3] to-[#8065E9] hover:opacity-95 text-white font-bold text-xs transition shadow-lg shadow-[#345CF3]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-app-gradient hover:opacity-95 text-white font-bold text-xs transition shadow-lg shadow-app-glow flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <span>{isLoading ? 'Autenticando...' : 'Entrar no RAON System'}</span>
+              <span>{isLoading ? 'Autenticando...' : 'Entrar no Lucre+'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Quick Sandbox Logins (For rapid testing in preview) */}
+          {/* Quick Sandbox Logins */}
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2 text-center">
               Acesso Rápido para Demonstração (1 Clique)
@@ -245,7 +304,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   <span className="font-bold text-slate-800 dark:text-slate-100 block">Thiago Pinheiro</span>
                   <span className="text-[10px] text-slate-400">Proprietário & Admin • agenciaraon@gmail.com</span>
                 </div>
-                <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-[#345CF3]/10 text-[#345CF3]">Proprietário</span>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded bg-app-light text-app-primary">Proprietário</span>
               </button>
 
               <button
@@ -268,9 +327,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
               Não tem uma conta ainda?{' '}
               <button
                 onClick={onSwitchToRegister}
-                className="font-bold text-[#345CF3] hover:underline cursor-pointer"
+                className="font-bold text-app-primary hover:underline cursor-pointer"
               >
-                Cadastre sua empresa
+                Cadastre sua empresa (Plano R$ 29,90/mês)
               </button>
             </p>
           </div>

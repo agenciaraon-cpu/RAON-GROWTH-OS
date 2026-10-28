@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { 
   Search, Bell, Sun, Moon, Store, Plus, 
   ChevronDown, Check, User, Settings, LogOut, 
-  ShieldAlert, Database, Sparkles, ExternalLink, X
+  ShieldAlert, Database, Sparkles, ExternalLink, X, Palette
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { ColorThemePicker } from '../common/ColorThemePicker';
 import { AppNavigationRoute } from '../../types';
 import { isSupabaseConfigured } from '../../lib/supabase';
 
@@ -33,17 +34,19 @@ export const Header: React.FC<HeaderProps> = ({
     isPlatformAdmin 
   } = useAuth();
   
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, colorThemeOption } = useTheme();
 
   // Dropdown states
   const [isTenantMenuOpen, setIsTenantMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isColorMenuOpen, setIsColorMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
   const tenantMenuRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
+  const colorMenuRef = useRef<HTMLDivElement>(null);
 
   // Close menus on outside click
   useEffect(() => {
@@ -57,6 +60,9 @@ export const Header: React.FC<HeaderProps> = ({
       if (notificationsRef.current && !notificationsRef.current.contains(e.target as Node)) {
         setIsNotificationsOpen(false);
       }
+      if (colorMenuRef.current && !colorMenuRef.current.contains(e.target as Node)) {
+        setIsColorMenuOpen(false);
+      }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
@@ -66,15 +72,15 @@ export const Header: React.FC<HeaderProps> = ({
   const notifications = [
     {
       id: '1',
-      title: 'Bem-vindo ao RAON System',
+      title: 'Bem-vindo ao Lucre+',
       description: 'Sua empresa está ativa no ambiente multi-tenant com segurança RLS.',
       time: 'Hoje',
       type: 'success',
     },
     {
       id: '2',
-      title: 'Etapa 1: Gestão Comercial',
-      description: 'Estrutura multiempresa, perfis, equipe e banco PostgreSQL prontos.',
+      title: 'Plano Fixo Lucre+ R$ 29,90/mês',
+      description: 'Acesso completo a todos os recursos comerciais e multiempresa.',
       time: 'Hoje',
       type: 'info',
     },
@@ -194,6 +200,43 @@ export const Header: React.FC<HeaderProps> = ({
         >
           {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-600" />}
         </button>
+
+        {/* Color Palette Picker Button */}
+        <div className="relative" ref={colorMenuRef}>
+          <button
+            onClick={() => setIsColorMenuOpen(!isColorMenuOpen)}
+            className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition flex items-center gap-1.5"
+            title="Escolher cor do app Lucre+ (5 opções + padrão)"
+          >
+            <Palette className="w-4 h-4 text-app-primary" />
+            <span 
+              className="w-2.5 h-2.5 rounded-full shadow-xs" 
+              style={{ backgroundColor: colorThemeOption.hex }}
+            />
+          </button>
+
+          {isColorMenuOpen && (
+            <div className="absolute right-0 mt-2 w-84 rounded-3xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-2xl p-4 z-50 animate-in fade-in slide-in-from-top-2">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-app-primary" />
+                  <span className="text-xs font-bold text-slate-900 dark:text-white">
+                    Cores do Lucre+
+                  </span>
+                </div>
+                <span className="text-[10px] text-slate-400 font-medium">
+                  {colorThemeOption.name}
+                </span>
+              </div>
+
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-3">
+                Escolha a cor que melhor combina com a identidade visual da sua loja:
+              </p>
+
+              <ColorThemePicker layout="row" showLabels={true} />
+            </div>
+          )}
+        </div>
 
         {/* Notifications Popover */}
         <div className="relative" ref={notificationsRef}>

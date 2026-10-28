@@ -40,10 +40,10 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
     <nav className="flex items-center gap-2 text-xs text-slate-400 mb-6">
       <button 
         onClick={() => onRouteChange('overview')}
-        className="flex items-center gap-1.5 hover:text-[#345CF3] transition font-medium"
+        className="flex items-center gap-1.5 hover:text-app-primary transition font-medium"
       >
         <Home className="w-3.5 h-3.5" />
-        <span>{tenantName || 'RAON System'}</span>
+        <span>{tenantName || 'Lucre+'}</span>
       </button>
 
       {currentRoute !== 'overview' && (

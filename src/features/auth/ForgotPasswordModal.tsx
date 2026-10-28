@@ -89,7 +89,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
                 placeholder="seuemail@empresa.com.br"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#345CF3] outline-hidden transition"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-app-primary outline-hidden transition"
               />
             </div>
           </div>
@@ -98,14 +98,14 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-5 py-2.5 rounded-xl bg-[#345CF3] hover:bg-[#2849d4] text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-[#345CF3]/20 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-app-primary hover:bg-app-primary-hover text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-app-glow disabled:opacity-50 cursor-pointer"
             >
               <span>{isSubmitting ? 'Enviando...' : 'Enviar Link de Redefinição'}</span>
               <ArrowRight className="w-4 h-4" />

@@ -31,25 +31,12 @@ export const RaonAdminView: React.FC = () => {
 
   const plans = [
     {
-      name: 'RAON Starter',
-      price: 'R$ 97,00/mês',
-      limits: 'Até 2 usuários • 300 produtos',
-      activeSubs: 8,
-      status: 'Ativo',
-    },
-    {
-      name: 'RAON Pro Varejo',
-      price: 'R$ 197,00/mês',
-      limits: 'Até 5 usuários • 2.000 produtos • Crediário',
-      activeSubs: 24,
-      status: 'Mais Popular',
-    },
-    {
-      name: 'RAON Enterprise',
-      price: 'R$ 397,00/mês',
-      limits: 'Até 20 usuários • 10.000 produtos • Multi-caixa',
-      activeSubs: 5,
-      status: 'Corporativo',
+      name: 'Plano Fixo Lucre+',
+      price: 'R$ 29,90/mês',
+      limits: 'Acesso completo e irrestrito ao sistema',
+      features: 'PDV / Caixa, Vendas, Produtos & Estoque, Clientes, Vendas a Prazo, Financeiro, Gestão de Equipe e Suporte',
+      activeSubs: activeTenants,
+      status: 'Plano Único Fixo',
     },
   ];
 
@@ -63,14 +50,14 @@ export const RaonAdminView: React.FC = () => {
               PLATAFORMA GLOBAL — SUPERADMIN
             </span>
             <span className="text-xs text-slate-400">
-              Operação RAON System
+              Operação Lucre+
             </span>
           </div>
           <h1 className="text-xl sm:text-2xl font-extrabold text-white mt-1.5">
-            Painel Administrativo da Plataforma
+            Painel Administrativo Lucre+
           </h1>
           <p className="text-xs text-slate-300 max-w-xl mt-1">
-            Supervisão geral de empresas contratantes, planos, assinaturas ativas e status de infraestrutura Supabase/PostgreSQL.
+            Supervisão geral de empresas varejistas, plano fixo de R$ 29,90/mês, assinaturas e status do Supabase.
           </p>
         </div>
 
@@ -137,29 +124,47 @@ export const RaonAdminView: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {plans.map(p => (
-            <div key={p.name} className="p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+            <div key={p.name} className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-900/60 border-2 border-app-primary/30 flex flex-col justify-between relative overflow-hidden shadow-sm">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-app-light rounded-full blur-2xl pointer-events-none" />
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-slate-900 dark:text-white">{p.name}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#345CF3]/10 text-[#345CF3]">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">{p.name}</span>
+                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-app-light text-app-primary border border-app-primary/30">
                     {p.status}
                   </span>
                 </div>
-                <div className="text-lg font-extrabold text-[#345CF3] font-mono mb-2">
-                  {p.price}
+                <div className="text-3xl font-extrabold text-app-primary font-mono my-2 flex items-baseline gap-1">
+                  <span>{p.price}</span>
+                  <span className="text-xs text-slate-400 font-sans font-normal">fixo sem surpresas</span>
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
                   {p.limits}
+                </p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                  Incluso: {p.features}
                 </p>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-500">
-                Lojistas aderentes: <strong className="text-slate-800 dark:text-slate-200">{p.activeSubs} empresas</strong>
+              <div className="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 flex items-center justify-between">
+                <span>Empresas ativas neste plano:</span>
+                <strong className="text-slate-900 dark:text-white font-mono">{p.activeSubs} lojas</strong>
               </div>
             </div>
           ))}
+
+          <div className="p-6 rounded-3xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 flex flex-col justify-center space-y-3">
+            <span className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider block">
+              Política de Preço Lucre+
+            </span>
+            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+              O modelo de plano único a R$ 29,90/mês garante previsibilidade para os lojistas do varejo, sem custos extras por emissão de comprovantes, cadastros de produtos ou usuários adicionais.
+            </p>
+            <div className="pt-2 text-[11px] text-[#17B897] font-semibold flex items-center gap-1.5">
+              <span>✓ Período de teste gratuito de 14 dias para todas as novas empresas</span>
+            </div>
+          </div>
         </div>
       </div>
 

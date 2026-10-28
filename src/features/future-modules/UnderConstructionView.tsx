@@ -65,7 +65,7 @@ export const UnderConstructionView: React.FC<UnderConstructionViewProps> = ({
   return (
     <div className="max-w-3xl mx-auto py-12 px-6">
       <div className="p-8 sm:p-12 rounded-3xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-xl text-center space-y-6">
-        <div className="w-16 h-16 rounded-3xl bg-[#345CF3]/10 text-[#345CF3] flex items-center justify-center mx-auto shadow-sm">
+        <div className="w-16 h-16 rounded-3xl bg-app-light text-app-primary flex items-center justify-center mx-auto shadow-sm">
           <Icon className="w-8 h-8" />
         </div>
 

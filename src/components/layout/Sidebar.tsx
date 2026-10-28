@@ -118,17 +118,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="h-18 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-800/60">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#345CF3] to-[#8065E9] flex items-center justify-center text-white font-extrabold text-lg shrink-0 shadow-md shadow-[#345CF3]/20">
-              R
+            <div className="w-10 h-10 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-lg shrink-0 shadow-md shadow-app-glow">
+              L+
             </div>
             {!collapsed && (
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
                   <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-base">
-                    RAON
+                    Lucre+
                   </span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-[#345CF3]/10 text-[#345CF3] dark:bg-[#345CF3]/20 dark:text-[#345CF3] uppercase tracking-wider">
-                    System
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-app-light text-app-primary uppercase tracking-wider">
+                    SaaS
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-400 dark:text-slate-400 truncate max-w-[170px]">
@@ -196,7 +196,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     title={collapsed ? item.label : undefined}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all group relative ${
                       isActive
-                        ? 'bg-[#345CF3] text-white shadow-sm shadow-[#345CF3]/30 font-semibold'
+                        ? 'bg-app-primary text-white shadow-sm shadow-app-glow font-semibold'
                         : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/50'
                     }`}
                   >
@@ -215,7 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         isActive
                           ? 'bg-white/20 text-white'
                           : item.badgeType === 'primary'
-                          ? 'bg-[#345CF3]/10 text-[#345CF3] dark:bg-[#345CF3]/20 dark:text-[#38BDF8]'
+                          ? 'bg-app-light text-app-primary'
                           : item.badgeType === 'warning'
                           ? 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'
                           : 'bg-slate-200/70 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
@@ -236,14 +236,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {!collapsed ? (
           <div className="px-2 py-1 text-center">
             <span className="text-[10px] text-slate-400 dark:text-slate-400 block font-medium">
-              RAON System • v1.0.0 (Etapa 1)
+              Lucre+ • v1.0.0 (Etapa 1)
             </span>
             <span className="text-[9px] text-[#17B897] font-semibold">
               Ambiente Seguro • PostgreSQL
             </span>
           </div>
         ) : (
-          <div className="w-2 h-2 rounded-full bg-[#17B897] mx-auto" title="RAON System Ativo" />
+          <div className="w-2 h-2 rounded-full bg-[#17B897] mx-auto" title="Lucre+ Ativo" />
         )}
       </div>
     </aside>

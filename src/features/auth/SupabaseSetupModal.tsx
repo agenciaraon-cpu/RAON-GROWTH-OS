@@ -48,7 +48,7 @@ export const SupabaseSetupModal: React.FC<SupabaseSetupModalProps> = ({
       setTestResult({
         success: true,
         latencyMs: res.latencyMs,
-        message: `Conexão estabelecida com sucesso com o Supabase! Latência: ${res.latencyMs}ms. O RAON System está sincronizado.`,
+        message: `Conexão estabelecida com sucesso com o Supabase! Latência: ${res.latencyMs}ms. O Lucre+ está sincronizado.`,
       });
       setTimeout(() => {
         window.location.reload();
@@ -90,7 +90,7 @@ export const SupabaseSetupModal: React.FC<SupabaseSetupModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#345CF3]/15 text-[#345CF3] flex items-center justify-center font-bold">
+            <div className="w-10 h-10 rounded-2xl bg-app-light text-app-primary flex items-center justify-center font-bold">
               <Database className="w-5 h-5" />
             </div>
             <div>
@@ -107,7 +107,7 @@ export const SupabaseSetupModal: React.FC<SupabaseSetupModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                RAON System • PostgreSQL, Supabase Auth e Row Level Security (RLS)
+                Lucre+ • PostgreSQL, Supabase Auth e Row Level Security (RLS)
               </p>
             </div>
           </div>

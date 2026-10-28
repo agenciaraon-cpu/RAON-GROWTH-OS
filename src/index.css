@@ -2,6 +2,14 @@
 
 @layer base {
   :root {
+    --app-primary: #345CF3;
+    --app-primary-hover: #254ADB;
+    --app-primary-light: rgba(52, 92, 243, 0.12);
+    --app-gradient-from: #345CF3;
+    --app-gradient-to: #8065E9;
+    --app-border: #345CF3;
+    --app-glow: rgba(52, 92, 243, 0.35);
+
     --raon-night: #0B1225;
     --raon-blue: #345CF3;
     --raon-violet: #8065E9;
@@ -30,4 +38,33 @@
   ::-webkit-scrollbar-thumb:hover {
     background: rgba(148, 163, 184, 0.45);
   }
+}
+
+/* Dynamic Brand Utility Classes */
+.bg-app-primary {
+  background-color: var(--app-primary);
+}
+
+.hover\:bg-app-primary-hover:hover {
+  background-color: var(--app-primary-hover);
+}
+
+.text-app-primary {
+  color: var(--app-primary);
+}
+
+.border-app-primary {
+  border-color: var(--app-primary);
+}
+
+.bg-app-light {
+  background-color: var(--app-primary-light);
+}
+
+.bg-app-gradient {
+  background-image: linear-gradient(135deg, var(--app-gradient-from), var(--app-gradient-to));
+}
+
+.shadow-app-glow {
+  box-shadow: 0 10px 25px -5px var(--app-glow);
 }

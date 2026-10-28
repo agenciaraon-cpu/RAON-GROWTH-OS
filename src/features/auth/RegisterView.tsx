@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { 
   User, Mail, Lock, Eye, EyeOff, ArrowRight, 
-  ShieldCheck, AlertCircle, ArrowLeft 
+  ShieldCheck, AlertCircle, ArrowLeft, Palette, Sparkles, Check
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { ColorThemePicker } from '../../components/common/ColorThemePicker';
+import { useTheme } from '../../context/ThemeContext';
 
 interface RegisterViewProps {
   onSwitchToLogin: () => void;
@@ -15,6 +17,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
   onSuccessRegister,
 }) => {
   const { register, isLoading } = useAuth();
+  const { colorThemeOption } = useTheme();
 
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -51,23 +54,52 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-6 bg-[#F3F6FB] dark:bg-[#0B1225] text-slate-800 dark:text-slate-100">
-      <div className="w-full max-w-md bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-xl space-y-6">
+    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 bg-[#F3F6FB] dark:bg-[#0B1225] text-slate-800 dark:text-slate-100">
+      <div className="w-full max-w-lg bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
         <div>
           <button
             onClick={onSwitchToLogin}
-            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 dark:hover:text-white transition mb-3"
+            className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-700 dark:hover:text-white transition mb-3 cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Voltar ao login</span>
           </button>
 
-          <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            Criar conta no RAON System
-          </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Cadastre seu perfil de administrador para começar a gerenciar sua empresa.
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-9 h-9 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-sm shadow-md shadow-app-glow">
+              L+
+            </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Criar conta no Lucre+
+              </h2>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Cadastre seu perfil de administrador para começar a gerenciar sua empresa no varejo.
           </p>
+
+          {/* Plano Fixo Lucre+ Callout */}
+          <div className="mt-3 p-3 rounded-2xl bg-app-light border border-app-primary/30 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-app-primary shrink-0" />
+              <div>
+                <span className="text-xs font-bold text-slate-900 dark:text-white block">
+                  Plano Fixo Lucre+
+                </span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
+                  Todos os módulos inclusos • 14 dias de teste grátis
+                </span>
+              </div>
+            </div>
+            <div className="text-right shrink-0">
+              <span className="text-sm font-extrabold text-app-primary font-mono block">
+                R$ 29,90
+              </span>
+              <span className="text-[9px] text-slate-400">/mês</span>
+            </div>
+          </div>
         </div>
 
         {errorMessage && (
@@ -90,7 +122,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
                 placeholder="Ex: Carlos Silva"
                 value={fullName}
                 onChange={e => setFullName(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#345CF3] outline-hidden transition font-medium"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-app-primary outline-hidden transition font-medium"
               />
             </div>
           </div>
@@ -107,58 +139,77 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
                 placeholder="carlos@minhaloja.com.br"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#345CF3] outline-hidden transition font-medium"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-app-primary outline-hidden transition font-medium"
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Senha (mínimo 6 caracteres) *
-            </label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full pl-9 pr-10 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#345CF3] outline-hidden transition font-mono"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-              >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Senha (mínimo 6 dígitos) *
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-app-primary outline-hidden transition font-mono"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Confirmar Senha *
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-app-primary outline-hidden transition font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-3 text-slate-400 hover:text-slate-600"
+                >
+                  {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Confirmar Senha *
-            </label>
-            <div className="relative">
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={e => setConfirmPassword(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:border-[#345CF3] outline-hidden transition font-mono"
-              />
+          {/* Escolha da Cor do App */}
+          <div className="pt-2 pb-1 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex items-center justify-between mb-2">
+              <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
+                <Palette className="w-3.5 h-3.5 text-app-primary" />
+                <span>Escolha a cor do seu Lucre+:</span>
+              </label>
+              <span className="text-[10px] text-app-primary font-semibold">
+                {colorThemeOption.name}
+              </span>
             </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2.5">
+              Selecione entre as 5 cores principais ou a cor padrão para personalizar o sistema:
+            </p>
+            <ColorThemePicker layout="row" showLabels={true} />
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 rounded-xl bg-linear-to-r from-[#345CF3] to-[#8065E9] hover:opacity-95 text-white font-bold text-xs transition shadow-lg shadow-[#345CF3]/25 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
+            className="w-full py-3 rounded-xl bg-app-gradient hover:opacity-95 text-white font-bold text-xs transition shadow-lg shadow-app-glow flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-4"
           >
-            <span>{isLoading ? 'Criando conta...' : 'Continuar para Primeiro Acesso'}</span>
+            <span>{isLoading ? 'Criando conta...' : 'Criar Conta e Configurar Loja'}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
@@ -168,7 +219,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
             Já tem uma conta?{' '}
             <button
               onClick={onSwitchToLogin}
-              className="font-bold text-[#345CF3] hover:underline cursor-pointer"
+              className="font-bold text-app-primary hover:underline cursor-pointer"
             >
               Fazer login
             </button>

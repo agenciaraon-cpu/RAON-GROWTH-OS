@@ -300,8 +300,6 @@ INSERT INTO public.roles (code, name, description) VALUES
 ON CONFLICT (code) DO NOTHING;
 
 INSERT INTO public.plans (slug, name, price, billing_interval, limits, features, active) VALUES
-    ('starter', 'RAON Starter', 97.00, 'monthly', '{"max_users": 2, "max_products": 300}', '["pdv", "estoque_basico", "vendas"]', true),
-    ('pro', 'RAON Pro Varejo', 197.00, 'monthly', '{"max_users": 5, "max_products": 2000}', '["pdv", "estoque_avancado", "crediario", "financeiro", "catalogo"]', true),
-    ('enterprise', 'RAON Enterprise', 397.00, 'monthly', '{"max_users": 20, "max_products": 10000}', '["todas_as_features", "multi_caixa", "api", "suporte_vip"]', true)
-ON CONFLICT (slug) DO NOTHING;
+    ('plano_fixo_lucre', 'Plano Fixo Lucre+', 29.90, 'monthly', '{"max_users": 999, "max_products": 99999}', '["pdv", "estoque", "vendas", "crediario", "financeiro", "catalogo", "equipe", "todas_as_features"]', true)
+ON CONFLICT (slug) DO UPDATE SET price = 29.90, name = 'Plano Fixo Lucre+';
 `;

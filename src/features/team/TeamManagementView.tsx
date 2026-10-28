@@ -125,10 +125,10 @@ export const TeamManagementView: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-linear-to-r from-[#0B1225] via-[#101A38] to-[#0B1225] text-white border border-[#345CF3]/30 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 sm:p-8 rounded-3xl bg-linear-to-r from-[#0B1225] via-[#101A38] to-[#0B1225] text-white border border-app-primary/30 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#38BDF8] bg-[#38BDF8]/15 px-2.5 py-0.5 rounded-full border border-[#38BDF8]/30">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-app-primary bg-app-light px-2.5 py-0.5 rounded-full border border-app-primary/30">
               SEGURANÇA & ACESSOS
             </span>
             <span className="text-xs text-slate-400">
@@ -146,7 +146,7 @@ export const TeamManagementView: React.FC = () => {
         {isAuthorized && (
           <button
             onClick={() => setIsInviteModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-linear-to-r from-[#345CF3] to-[#8065E9] hover:opacity-95 text-white font-bold text-xs transition shadow-lg shadow-[#345CF3]/25 shrink-0 cursor-pointer"
+            className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-app-gradient hover:opacity-95 text-white font-bold text-xs transition shadow-lg shadow-app-glow shrink-0 cursor-pointer"
           >
             <UserPlus className="w-4 h-4" />
             <span>Convidar Funcionário</span>

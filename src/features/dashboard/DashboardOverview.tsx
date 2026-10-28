@@ -6,6 +6,7 @@ import {
   Sparkles, CheckCircle2, Store, Calendar, HelpCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { AppNavigationRoute } from '../../types';
 
 interface DashboardOverviewProps {
@@ -14,6 +15,7 @@ interface DashboardOverviewProps {
 
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate }) => {
   const { currentUser, currentTenant, currentMemberRole } = useAuth();
+  const { colorThemeOption } = useTheme();
 
   // Mode: Real Empty State vs Demo Visualization
   const [showDemoMetrics, setShowDemoMetrics] = useState(false);
@@ -25,12 +27,15 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
   return (
     <div className="space-y-6">
       {/* 1. Header Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-linear-to-r from-[#0B1225] via-[#15234A] to-[#0B1225] text-white border border-[#345CF3]/30 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="p-6 sm:p-8 rounded-3xl bg-linear-to-r from-[#0B1225] via-[#15234A] to-[#0B1225] text-white border border-app-primary/30 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
         {/* Glow */}
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#345CF3]/15 rounded-full blur-3xl pointer-events-none" />
+        <div 
+          className="absolute top-0 right-0 w-80 h-80 rounded-full blur-3xl pointer-events-none opacity-20"
+          style={{ backgroundColor: colorThemeOption.hex }} 
+        />
 
         <div className="relative z-10 flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-[#0E172E] border-2 border-[#345CF3]/40 overflow-hidden flex items-center justify-center shrink-0 shadow-lg">
+          <div className="w-16 h-16 rounded-2xl bg-[#0E172E] border-2 border-app-primary/40 overflow-hidden flex items-center justify-center shrink-0 shadow-lg">
             {currentUser?.avatarUrl ? (
               <img 
                 src={currentUser.avatarUrl} 
@@ -38,16 +43,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                 className="w-full h-full object-cover" 
               />
             ) : (
-              <span className="text-xl font-extrabold text-[#345CF3]">
+              <span className="text-xl font-extrabold text-app-primary">
                 {currentUser?.fullName?.split(' ').map(n => n[0]).slice(0, 2).join('') || 'U'}
               </span>
             )}
           </div>
 
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#38BDF8] bg-[#38BDF8]/15 px-2.5 py-0.5 rounded-full border border-[#38BDF8]/30">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-app-primary bg-app-light px-2.5 py-0.5 rounded-full border border-app-primary/30">
                 {currentTenant ? currentTenant.segment : 'Varejo Comercial'}
+              </span>
+              <span className="text-[10px] font-bold text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-full border border-amber-500/30">
+                Plano Fixo Lucre+ R$ 29,90/mês
               </span>
               <span className="text-xs text-slate-400">
                 Fuso: America/Bahia
