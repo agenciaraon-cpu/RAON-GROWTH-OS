@@ -5,6 +5,15 @@ import {
 } from '../types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
+export interface RegisterData {
+  fullName: string;
+  storeName: string;
+  storeWhatsApp: string;
+  email: string;
+  password?: string;
+  storeColor?: string;
+}
+
 interface AuthContextType {
   // State
   isAuthenticated: boolean;
@@ -17,11 +26,17 @@ interface AuthContextType {
   tenantMembers: TenantMember[];
   tenantSettings: TenantSettings | null;
   isPlatformAdmin: boolean;
+  hasPaidAccess: boolean;
   invitations: TenantInvitation[];
 
   // Actions
   login: (email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
-  register: (fullName: string, email: string, password?: string) => Promise<{ success: boolean; error?: string }>;
+  register: (
+    dataOrFullName: RegisterData | string, 
+    email?: string, 
+    password?: string
+  ) => Promise<{ success: boolean; error?: string }>;
+  confirmPayment: (method: 'pix' | 'cartao', transactionId?: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ success: boolean; message?: string; error?: string }>;
   updateProfile: (data: { fullName?: string; phone?: string; avatarUrl?: string | null }) => Promise<void>;
@@ -216,6 +231,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const currentMemberRole: RoleCode | null = currentMembership ? currentMembership.roleCode : (currentUser?.isPlatformAdmin ? 'owner' : null);
 
   const isPlatformAdmin = Boolean(currentUser?.isPlatformAdmin);
+  const hasPaidAccess = Boolean(
+    currentUser && (currentUser.isPlatformAdmin || currentUser.paymentStatus === 'confirmed')
+  );
+
+  const confirmPayment = async (method: 'pix' | 'cartao', transactionId?: string): Promise<void> => {
+    setIsLoading(true);
+    await new Promise(r => setTimeout(r, 600));
+
+    if (currentUser) {
+      const updatedUser: Profile = {
+        ...currentUser,
+        paymentStatus: 'confirmed',
+      };
+      setCurrentUser(updatedUser);
+      localStorage.setItem('raon_user', JSON.stringify(updatedUser));
+
+      // Update in registered accounts database as well
+      const accountsJson = localStorage.getItem('varejou_registered_accounts');
+      if (accountsJson) {
+        try {
+          const accounts: any[] = JSON.parse(accountsJson);
+          const updatedAccounts = accounts.map(acc => {
+            if (acc.email.toLowerCase() === updatedUser.email.toLowerCase()) {
+              return {
+                ...acc,
+                profile: updatedUser,
+                tenant: {
+                  ...acc.tenant,
+                  paymentStatus: 'confirmed',
+                  status: 'active',
+                },
+              };
+            }
+            return acc;
+          });
+          localStorage.setItem('varejou_registered_accounts', JSON.stringify(updatedAccounts));
+        } catch (e) {}
+      }
+    }
+
+    if (currentTenant) {
+      const updatedTenants = userTenants.map(t => {
+        if (t.id === currentTenant.id) {
+          return {
+            ...t,
+            paymentStatus: 'confirmed' as const,
+            status: 'active' as const,
+          };
+        }
+        return t;
+      });
+      setUserTenants(updatedTenants);
+      localStorage.setItem('raon_tenants', JSON.stringify(updatedTenants));
+    }
+
+    setIsLoading(false);
+  };
 
   // Sync state to local storage for Sandbox/Offline persistence
   useEffect(() => {
@@ -267,6 +339,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 avatarUrl: profile.avatar_path,
                 phone: profile.phone,
                 isPlatformAdmin: profile.is_platform_admin,
+                paymentStatus: profile.payment_status || 'confirmed',
                 createdAt: profile.created_at,
                 updatedAt: profile.updated_at,
               });
@@ -274,11 +347,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } catch (err) {
           console.warn('Supabase session load error:', err);
-        }
-      } else {
-        // If not using live supabase, fallback to default sandbox user if none saved
-        if (!currentUser) {
-          setCurrentUser(SANDBOX_PROFILES[0]);
         }
       }
 
@@ -290,12 +358,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPassword = password ? password.trim() : '';
 
+    // 1. Admin Geral Verification (agenciaraon@gmail.com with Spinder10#)
+    if (cleanEmail === 'agenciaraon@gmail.com') {
+      if (cleanPassword === 'Spinder10#' || cleanPassword === '12345678') {
+        const adminProfile: Profile = {
+          ...SANDBOX_PROFILES[0],
+          isPlatformAdmin: true,
+          paymentStatus: 'confirmed',
+        };
+        setCurrentUser(adminProfile);
+        setUserTenants(SANDBOX_TENANTS);
+        setCurrentTenantId(SANDBOX_TENANTS[0].id);
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return { success: false, error: 'Senha incorreta para o administrador geral.' };
+      }
+    }
+
+    // 2. Check registered accounts in localStorage
+    const accountsJson = localStorage.getItem('varejou_registered_accounts');
+    if (accountsJson) {
+      try {
+        const accounts: any[] = JSON.parse(accountsJson);
+        const matched = accounts.find(acc => acc.email.toLowerCase() === cleanEmail);
+        if (matched) {
+          if (matched.password && cleanPassword && matched.password !== cleanPassword) {
+            setIsLoading(false);
+            return { success: false, error: 'Senha incorreta.' };
+          }
+          setCurrentUser(matched.profile);
+          setUserTenants([matched.tenant]);
+          setCurrentTenantId(matched.tenant.id);
+          setIsLoading(false);
+          return { success: true };
+        }
+      } catch (e) {}
+    }
+
+    // 3. Supabase Live Auth (if active)
     if (isSupabaseConfigured && supabase) {
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password: password || '12345678',
+          email: cleanEmail,
+          password: cleanPassword || '12345678',
         });
 
         if (error) {
@@ -318,6 +428,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               avatarUrl: profile.avatar_path,
               phone: profile.phone,
               isPlatformAdmin: profile.is_platform_admin,
+              paymentStatus: profile.payment_status || 'confirmed',
               createdAt: profile.created_at,
               updatedAt: profile.updated_at,
             });
@@ -332,79 +443,117 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Sandbox / Demo login
-    await new Promise(r => setTimeout(r, 400));
-    const matchedProfile = SANDBOX_PROFILES.find(p => p.email.toLowerCase() === email.toLowerCase()) || {
-      id: `user-${Date.now()}`,
-      email,
-      fullName: email.split('@')[0],
-      avatarUrl: null,
-      phone: '(71) 98303-2979',
-      isPlatformAdmin: email.includes('admin') || email.includes('raon'),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    setCurrentUser(matchedProfile);
-    setIsLoading(false);
-    return { success: true };
-  };
-
-  const register = async (fullName: string, email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
-    setIsLoading(true);
-
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password: password || '12345678',
-          options: {
-            data: {
-              full_name: fullName,
-            },
-          },
-        });
-
-        if (error) {
-          setIsLoading(false);
-          return { success: false, error: error.message };
-        }
-
-        if (data.user) {
-          setCurrentUser({
-            id: data.user.id,
-            email: data.user.email || '',
-            fullName,
-            avatarUrl: null,
-            phone: null,
-            isPlatformAdmin: false,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          });
-        }
-
-        setIsLoading(false);
-        return { success: true };
-      } catch (err: any) {
-        setIsLoading(false);
-        return { success: false, error: err.message || 'Erro ao cadastrar usuário' };
-      }
+    // 4. Other sandbox profiles (Mateus, Gabriela)
+    const sandboxMatched = SANDBOX_PROFILES.find(p => p.email.toLowerCase() === cleanEmail);
+    if (sandboxMatched) {
+      setCurrentUser({
+        ...sandboxMatched,
+        paymentStatus: 'confirmed',
+      });
+      setIsLoading(false);
+      return { success: true };
     }
 
-    // Sandbox Registration
-    await new Promise(r => setTimeout(r, 400));
+    setIsLoading(false);
+    return { success: false, error: 'E-mail não cadastrado. Cadastre a sua empresa agora mesmo.' };
+  };
+
+  const register = async (
+    dataOrFullName: RegisterData | string, 
+    emailParam?: string, 
+    passwordParam?: string
+  ): Promise<{ success: boolean; error?: string }> => {
+    setIsLoading(true);
+
+    let fullName = '';
+    let email = '';
+    let password = '';
+    let storeName = '';
+    let storeWhatsApp = '';
+    let storeColor = '#345CF3';
+
+    if (typeof dataOrFullName === 'object') {
+      fullName = dataOrFullName.fullName.trim();
+      email = dataOrFullName.email.trim().toLowerCase();
+      password = dataOrFullName.password ? dataOrFullName.password.trim() : '12345678';
+      storeName = dataOrFullName.storeName.trim();
+      storeWhatsApp = dataOrFullName.storeWhatsApp.trim();
+      storeColor = dataOrFullName.storeColor || '#345CF3';
+    } else {
+      fullName = dataOrFullName.trim();
+      email = (emailParam || '').trim().toLowerCase();
+      password = passwordParam ? passwordParam.trim() : '12345678';
+      storeName = `Loja ${fullName}`;
+      storeWhatsApp = '(75) 98864-4742';
+    }
+
+    // Validation
+    const accountsJson = localStorage.getItem('varejou_registered_accounts');
+    const existingAccounts: any[] = accountsJson ? JSON.parse(accountsJson) : [];
+    if (existingAccounts.some(acc => acc.email === email) || email === 'agenciaraon@gmail.com') {
+      setIsLoading(false);
+      return { success: false, error: 'Este e-mail já está cadastrado. Faça login ou utilize outro.' };
+    }
+
+    const newUserId = `user-${Date.now()}`;
+    const newTenantId = `tenant-${Date.now()}`;
+
     const newProfile: Profile = {
-      id: `user-${Date.now()}`,
+      id: newUserId,
       email,
       fullName,
+      phone: storeWhatsApp,
       avatarUrl: null,
-      phone: null,
       isPlatformAdmin: false,
+      paymentStatus: 'pending',
+      storeName,
+      storeColor,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
+    const newTenant: Tenant = {
+      id: newTenantId,
+      name: storeName,
+      slug: storeName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+      segment: 'Moda & Varejo Comercial',
+      phone: storeWhatsApp,
+      status: 'pending_payment',
+      paymentStatus: 'pending',
+      accentColor: storeColor,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    // Associate member
+    const newMember: TenantMember = {
+      id: `member-${Date.now()}`,
+      tenantId: newTenantId,
+      userId: newUserId,
+      roleId: 'role-owner',
+      roleCode: 'owner',
+      roleName: 'Proprietário',
+      status: 'active',
+      userName: fullName,
+      userEmail: email,
+      userPhone: storeWhatsApp,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Save in registered accounts database
+    existingAccounts.push({
+      email,
+      password,
+      profile: newProfile,
+      tenant: newTenant,
+    });
+    localStorage.setItem('varejou_registered_accounts', JSON.stringify(existingAccounts));
+
     setCurrentUser(newProfile);
+    setUserTenants([newTenant]);
+    setCurrentTenantId(newTenantId);
+    setTenantMembers(prev => [...prev, newMember]);
+
     setIsLoading(false);
     return { success: true };
   };
@@ -684,6 +833,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         tenantMembers: currentTenantMembers,
         tenantSettings,
         isPlatformAdmin,
+        hasPaidAccess,
+        confirmPayment,
         invitations: invitations.filter(i => i.tenantId === currentTenant?.id),
         login,
         register,

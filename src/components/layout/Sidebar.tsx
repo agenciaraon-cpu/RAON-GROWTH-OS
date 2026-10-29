@@ -108,39 +108,45 @@ export const Sidebar: React.FC<SidebarProps> = ({
         collapsed ? 'w-20' : 'w-72'
       } bg-[#FFFFFF] dark:bg-[#0B1225] border-slate-200 dark:border-slate-800/80 shadow-xs`}
     >
-      {/* Brand Header */}
+      {/* Brand Header (Zero borders around transparent image) */}
       <div>
-        <div className="h-18 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-800/60">
-          <div className="flex items-center gap-3 overflow-hidden">
-            <img 
-              src="/assets/aistudio/logovarejo_0f870eab.png" 
-              alt="Varejou" 
-              className="w-10 h-10 object-contain rounded-xl shrink-0 filter drop-shadow-sm" 
-            />
-            {!collapsed && (
-              <div className="truncate">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-base">
-                    Varejou
-                  </span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-app-light text-app-primary uppercase tracking-wider">
-                    SaaS
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-400 dark:text-slate-400 truncate max-w-[170px]">
-                  Sua loja. Seu controle.
-                </p>
+        <div className="flex items-center justify-between p-3 pb-2 border-0">
+          {!collapsed ? (
+            <div className="w-full flex flex-col items-center justify-center text-center pt-1 pb-1 relative">
+              <button
+                onClick={onToggleCollapse}
+                className="absolute right-0 top-1 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer z-10"
+                title="Recolher menu lateral"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <div className="w-full flex justify-center items-center py-1">
+                <img 
+                  src="/assets/aistudio/top_3c38211a.png" 
+                  alt="Varejou" 
+                  className="w-full max-w-[245px] h-auto object-contain mx-auto select-none transform hover:scale-105 transition-all duration-300 pointer-events-auto" 
+                />
               </div>
-            )}
-          </div>
-
-          <button
-            onClick={onToggleCollapse}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition"
-            title={collapsed ? 'Expandir menu lateral' : 'Recolher menu lateral'}
-          >
-            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-          </button>
+              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-0.5">
+                Sua loja • Seu controle
+              </span>
+            </div>
+          ) : (
+            <div className="w-full flex flex-col items-center justify-center py-2 gap-2">
+              <button
+                onClick={onToggleCollapse}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition cursor-pointer"
+                title="Expandir menu lateral"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <img 
+                src="/assets/aistudio/top_3c38211a.png" 
+                alt="Varejou" 
+                className="w-14 h-auto object-contain mx-auto select-none" 
+              />
+            </div>
+          )}
         </div>
 
         {/* Current Tenant Badge (if expanded) */}

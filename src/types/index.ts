@@ -12,11 +12,14 @@ export interface Profile {
   avatarUrl?: string | null;
   phone?: string | null;
   isPlatformAdmin?: boolean;
+  paymentStatus?: 'pending' | 'confirmed';
+  storeName?: string;
+  storeColor?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export type TenantStatus = 'active' | 'inactive' | 'suspended' | 'trial';
+export type TenantStatus = 'active' | 'inactive' | 'suspended' | 'trial' | 'pending_payment';
 
 export interface Tenant {
   id: string;
@@ -30,6 +33,8 @@ export interface Tenant {
   logoPath?: string | null;
   logoUrl?: string | null;
   status: TenantStatus;
+  paymentStatus?: 'pending' | 'confirmed';
+  accentColor?: string;
   createdAt: string;
   updatedAt: string;
 }

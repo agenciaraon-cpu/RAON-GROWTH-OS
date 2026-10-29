@@ -5,6 +5,7 @@ import { RetailDataProvider } from './context/RetailDataContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { Breadcrumbs } from './components/layout/Breadcrumbs';
+import { FloatingWhatsAppSupport } from './components/common/FloatingWhatsAppSupport';
 
 // Features
 import { LoginView } from './features/auth/LoginView';
@@ -12,6 +13,7 @@ import { RegisterView } from './features/auth/RegisterView';
 import { ForgotPasswordModal } from './features/auth/ForgotPasswordModal';
 import { OnboardingView } from './features/auth/OnboardingView';
 import { SupabaseSetupModal } from './features/auth/SupabaseSetupModal';
+import { PaymentCheckoutView } from './features/payment/PaymentCheckoutView';
 
 import { DashboardOverview } from './features/dashboard/DashboardOverview';
 import { ProfileView } from './features/profile/ProfileView';
@@ -32,7 +34,7 @@ import { SalesHistoryView } from './features/sales/SalesHistoryView';
 import { AppNavigationRoute } from './types';
 
 function AppContent() {
-  const { isAuthenticated, isLoading, userTenants, currentTenant } = useAuth();
+  const { isAuthenticated, isLoading, userTenants, currentTenant, hasPaidAccess } = useAuth();
 
   // Navigation route
   const [currentRoute, setCurrentRoute] = useState<AppNavigationRoute>('overview');
@@ -83,7 +85,9 @@ function AppContent() {
         ) : (
           <RegisterView
             onSwitchToLogin={() => setAuthScreen('login')}
-            onSuccessRegister={() => setAuthScreen('login')}
+            onSuccessRegister={() => {
+              // Successfully registered: now automatically goes to payment area
+            }}
           />
         )}
 
@@ -96,6 +100,19 @@ function AppContent() {
           isOpen={isSupabaseSetupOpen}
           onClose={() => setIsSupabaseSetupOpen(false)}
         />
+
+        {/* Global WhatsApp Support Floating Button */}
+        <FloatingWhatsAppSupport />
+      </>
+    );
+  }
+
+  // Acesso Bloqueado antes de confirmar pagamento (exceto Admin Geral)
+  if (!hasPaidAccess) {
+    return (
+      <>
+        <PaymentCheckoutView />
+        <FloatingWhatsAppSupport />
       </>
     );
   }
@@ -103,7 +120,10 @@ function AppContent() {
   // First access check: user has no company created yet
   if (userTenants.length === 0) {
     return (
-      <OnboardingView onComplete={() => setCurrentRoute('overview')} />
+      <>
+        <OnboardingView onComplete={() => setCurrentRoute('overview')} />
+        <FloatingWhatsAppSupport />
+      </>
     );
   }
 
@@ -191,6 +211,9 @@ function AppContent() {
         isOpen={isSupabaseSetupOpen}
         onClose={() => setIsSupabaseSetupOpen(false)}
       />
+
+      {/* WhatsApp Suporte em todas as partes do app */}
+      <FloatingWhatsAppSupport />
     </div>
   );
 }
