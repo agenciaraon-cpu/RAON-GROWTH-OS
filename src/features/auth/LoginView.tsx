@@ -23,11 +23,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
   const { colorThemeOption } = useTheme();
 
   const [email, setEmail] = useState(() => {
-    return localStorage.getItem('lucre_remembered_email') || localStorage.getItem('raon_remembered_email') || '';
+    return localStorage.getItem('varejou_remembered_email') || localStorage.getItem('lucre_remembered_email') || localStorage.getItem('raon_remembered_email') || '';
   });
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberEmail, setRememberEmail] = useState(Boolean(localStorage.getItem('lucre_remembered_email') || localStorage.getItem('raon_remembered_email')));
+  const [rememberEmail, setRememberEmail] = useState(Boolean(localStorage.getItem('varejou_remembered_email') || localStorage.getItem('lucre_remembered_email') || localStorage.getItem('raon_remembered_email')));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
 
@@ -41,9 +41,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
     }
 
     if (rememberEmail) {
-      localStorage.setItem('lucre_remembered_email', email.trim());
+      localStorage.setItem('varejou_remembered_email', email.trim());
     } else {
-      localStorage.removeItem('lucre_remembered_email');
+      localStorage.removeItem('varejou_remembered_email');
     }
 
     const res = await login(email.trim(), password);
@@ -72,18 +72,18 @@ export const LoginView: React.FC<LoginViewProps> = ({
         {/* Top Header */}
         <div className="relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-app-gradient flex items-center justify-center text-white font-black text-xl shadow-lg shadow-app-glow">
-              L+
+            <div className="w-11 h-11 rounded-2xl bg-app-gradient flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-app-glow">
+              V
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-2xl tracking-tight text-white">Lucre+</span>
+                <span className="font-extrabold text-2xl tracking-tight text-white">Varejou</span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-app-light text-app-primary uppercase tracking-wider border border-app-primary/30">
                   SaaS Varejo
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Sua empresa. Seu controle. Tudo em um só lugar.
+                Sua loja. Seu controle. Varejou!
               </p>
             </div>
           </div>
@@ -93,7 +93,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
         <div className="my-10 relative z-10 space-y-6 max-w-lg">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#17B897]/15 border border-[#17B897]/30 text-[#17B897] text-xs font-semibold">
             <ShieldCheck className="w-4 h-4" />
-            <span>Gestão Comercial SaaS com PostgreSQL & Multi-Tenant</span>
+            <span>Gestão Comercial para o Varejo com PostgreSQL & Multi-Tenant</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
@@ -101,20 +101,20 @@ export const LoginView: React.FC<LoginViewProps> = ({
           </h1>
 
           <p className="text-sm text-slate-300 leading-relaxed">
-            O <strong className="text-white">Lucre+</strong> foi desenvolvido para lojas de roupas, calçados, cosméticos, eletrônicos, variedades e comércios que buscam simplicidade operacional e segurança.
+            O <strong className="text-white">Varejou</strong> foi desenvolvido para lojas de roupas, calçados, cosméticos, eletrônicos, variedades e comércios que buscam simplicidade operacional, agilidade no balcão e segurança.
           </p>
 
           {/* Plano Fixo Card */}
           <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xs flex items-center justify-between gap-4">
             <div>
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-primary block">
-                Plano Fixo Lucre+
+                Plano Fixo Varejou
               </span>
               <span className="text-sm font-extrabold text-white block">
                 Tudo incluso em um só lugar
               </span>
               <span className="text-[11px] text-slate-400">
-                PDV, Vendas, Estoque, Financeiro e Equipe
+                PDV Frente de Caixa, Roupas, Estoque, Clientes e WhatsApp
               </span>
             </div>
             <div className="text-right">
@@ -128,7 +128,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
           <div className="grid grid-cols-2 gap-3 pt-1">
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs">
               <span className="text-xs font-bold text-white block">Multi-Tenant Seguro</span>
-              <span className="text-[11px] text-slate-400">Isolamento rigoroso por empresa via RLS</span>
+              <span className="text-[11px] text-slate-400">Isolamento total por loja no banco de dados</span>
             </div>
             <div className="p-3 rounded-xl bg-white/5 border border-white/10 backdrop-blur-xs">
               <span className="text-xs font-bold text-[#17B897] block">Supabase Conectado</span>
@@ -139,7 +139,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
         {/* Footer info */}
         <div className="relative z-10 flex items-center justify-between text-xs text-slate-400 border-t border-white/10 pt-4">
-          <span>Lucre+ • v1.0.0</span>
+          <span>Varejou • v1.0.0</span>
           <span>Fuso: America/Bahia (BRL)</span>
         </div>
       </div>
@@ -150,10 +150,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                Acesse o Lucre+
+                Acesse o Varejou
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                Informe suas credenciais para gerenciar sua empresa comercial.
+                Informe suas credenciais para gerenciar sua loja comercial.
               </p>
             </div>
 
@@ -177,7 +177,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
             <div className="p-4 rounded-2xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-md animate-in fade-in space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-900 dark:text-white">
-                  Cores do Lucre+ (5 opções + padrão)
+                  Cores do Varejou (5 cores + padrão)
                 </span>
                 <span className="text-[10px] text-app-primary font-bold">
                   {colorThemeOption.name}

@@ -275,12 +275,12 @@ export const CompanySettingsView: React.FC = () => {
           </div>
         </div>
 
-        {/* 4. Identidade Visual & Cores do Lucre+ */}
+        {/* 4. Identidade Visual & Cores do Varejou */}
         <div className="p-6 rounded-3xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-xs space-y-6">
           <div className="border-b border-slate-100 dark:border-slate-800 pb-4">
             <h2 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
               <Palette className="w-4 h-4 text-app-primary" />
-              <span>Cor Padrão do Lucre+ para a Empresa</span>
+              <span>Cor Padrão do Varejou para a Loja</span>
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
               Alterne entre as 5 cores principais (Verde Escuro, Rosa Choque, Preto, Laranja Ouro, Roxo) ou a cor padrão para personalizar a experiência de toda a equipe

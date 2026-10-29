@@ -64,14 +64,14 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
         <div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-app-light text-app-primary text-xs font-bold uppercase tracking-wider mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Primeiro Acesso — Lucre+</span>
+            <span>Primeiro Acesso — Varejou</span>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            Olá, {currentUser?.fullName || 'Lojista'}! Vamos cadastrar sua empresa.
+            Olá, {currentUser?.fullName || 'Lojista'}! Vamos cadastrar sua loja.
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
-            Você será configurado como o <strong>Proprietário</strong> com acesso irrestrito ao sistema no <strong>Plano Fixo Lucre+ (R$ 29,90/mês)</strong>.
+            Você será configurado como o <strong>Proprietário</strong> com acesso irrestrito ao sistema no <strong>Plano Fixo Varejou (R$ 29,90/mês)</strong>.
           </p>
         </div>
 
@@ -191,7 +191,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="text-xs text-[#17B897] font-semibold flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Plano Fixo Lucre+ R$ 29,90/mês • 14 dias grátis</span>
+              <span>Plano Fixo Varejou R$ 29,90/mês • 14 dias grátis</span>
             </span>
 
             <button
@@ -199,7 +199,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
               disabled={isSubmitting}
               className="px-6 py-3 rounded-xl bg-app-gradient hover:opacity-95 text-white font-bold text-xs transition shadow-lg shadow-app-glow flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <span>{isSubmitting ? 'Criando empresa...' : 'Criar Empresa & Entrar no Lucre+'}</span>
+              <span>{isSubmitting ? 'Criando loja...' : 'Criar Loja & Entrar no Varejou'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

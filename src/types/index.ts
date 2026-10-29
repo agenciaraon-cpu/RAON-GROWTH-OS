@@ -154,3 +154,71 @@ export type AppNavigationRoute =
   | 'profile'
   | 'raon_admin'
   | 'support';
+
+// ==============================================================================
+// MÓDULOS DE VAREJO OPERACIONAL (VAREJOU)
+// ==============================================================================
+
+export interface Product {
+  id: string;
+  tenantId: string;
+  name: string;
+  sku: string;
+  barcode?: string;
+  category: string;
+  size?: string;
+  color?: string;
+  costPrice: number;
+  salePrice: number;
+  currentStock: number;
+  minStock: number;
+  imageUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Client {
+  id: string;
+  tenantId: string;
+  name: string;
+  phone: string;
+  email?: string;
+  cpf?: string;
+  address?: string;
+  creditLimit: number;
+  currentDebt: number;
+  notes?: string;
+  createdAt: string;
+}
+
+export interface SaleItem {
+  productId: string;
+  productName: string;
+  sku: string;
+  size?: string;
+  color?: string;
+  unitPrice: number;
+  quantity: number;
+  subtotal: number;
+}
+
+export type PaymentMethod = 'dinheiro' | 'pix' | 'cartao_credito' | 'cartao_debito' | 'crediario';
+
+export interface Sale {
+  id: string;
+  tenantId: string;
+  code: string;
+  clientId?: string;
+  clientName: string;
+  sellerName: string;
+  items: SaleItem[];
+  subtotal: number;
+  discount: number;
+  total: number;
+  paymentMethod: PaymentMethod;
+  amountPaid?: number;
+  change?: number;
+  status: 'completed' | 'canceled';
+  createdAt: string;
+}
+

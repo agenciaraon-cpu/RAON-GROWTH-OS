@@ -66,27 +66,27 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
           </button>
 
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-sm shadow-md shadow-app-glow">
-              L+
+            <div className="w-9 h-9 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-base shadow-md shadow-app-glow">
+              V
             </div>
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-                Criar conta no Lucre+
+                Criar conta no Varejou
               </h2>
             </div>
           </div>
 
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Cadastre seu perfil de administrador para começar a gerenciar sua empresa no varejo.
+            Cadastre seu perfil de lojista para começar a cadastrar sua empresa, roupas, produtos e emitir vendas no PDV.
           </p>
 
-          {/* Plano Fixo Lucre+ Callout */}
+          {/* Plano Fixo Varejou Callout */}
           <div className="mt-3 p-3 rounded-2xl bg-app-light border border-app-primary/30 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-app-primary shrink-0" />
               <div>
                 <span className="text-xs font-bold text-slate-900 dark:text-white block">
-                  Plano Fixo Lucre+
+                  Plano Fixo Varejou
                 </span>
                 <span className="text-[10px] text-slate-500 dark:text-slate-400 block">
                   Todos os módulos inclusos • 14 dias de teste grátis
@@ -192,7 +192,7 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
             <div className="flex items-center justify-between mb-2">
               <label className="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                 <Palette className="w-3.5 h-3.5 text-app-primary" />
-                <span>Escolha a cor do seu Lucre+:</span>
+                <span>Escolha a cor do seu Varejou:</span>
               </label>
               <span className="text-[10px] text-app-primary font-semibold">
                 {colorThemeOption.name}

@@ -43,7 +43,7 @@ export const Breadcrumbs: React.FC<BreadcrumbsProps> = ({
         className="flex items-center gap-1.5 hover:text-app-primary transition font-medium"
       >
         <Home className="w-3.5 h-3.5" />
-        <span>{tenantName || 'Lucre+'}</span>
+        <span>{tenantName || 'Varejou'}</span>
       </button>
 
       {currentRoute !== 'overview' && (

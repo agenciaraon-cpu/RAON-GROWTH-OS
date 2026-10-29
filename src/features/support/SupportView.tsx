@@ -36,7 +36,7 @@ export const SupportView: React.FC = () => {
           RAON — Marketing, IA & Tecnologia
         </h2>
         <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">
-          O <strong>Lucre+</strong> é uma plataforma SaaS de gestão comercial projetada pela <strong>RAON</strong> para atender ao comércio varejista brasileiro com máxima segurança, conformidade e velocidade operacional.
+          O <strong>Varejou</strong> é uma plataforma SaaS de gestão comercial projetada pela <strong>RAON</strong> para atender ao comércio varejista brasileiro com máxima segurança, conformidade e velocidade operacional.
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">

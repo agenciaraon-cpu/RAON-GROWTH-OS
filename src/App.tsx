@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { RetailDataProvider } from './context/RetailDataContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { Breadcrumbs } from './components/layout/Breadcrumbs';
@@ -21,6 +22,13 @@ import { RaonAdminView } from './features/admin/RaonAdminView';
 import { SupportView } from './features/support/SupportView';
 import { UnderConstructionView } from './features/future-modules/UnderConstructionView';
 
+// Real Retail Operations Modules
+import { PosView } from './features/pos/PosView';
+import { ProductsView } from './features/products/ProductsView';
+import { StockView } from './features/stock/StockView';
+import { ClientsView } from './features/clients/ClientsView';
+import { SalesHistoryView } from './features/sales/SalesHistoryView';
+
 import { AppNavigationRoute } from './types';
 
 function AppContent() {
@@ -31,20 +39,30 @@ function AppContent() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Auth sub-screens
-  const [authScreen, setAuthScreen] = useState<'login' | 'register'>('login');
+  const isAutoStoreRegistration = typeof window !== 'undefined' && window.location.search.includes('cadastro=loja');
+  const [authScreen, setAuthScreen] = useState<'login' | 'register'>(
+    isAutoStoreRegistration ? 'register' : 'login'
+  );
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const [isSupabaseSetupOpen, setIsSupabaseSetupOpen] = useState(false);
   const [isCreateTenantOpen, setIsCreateTenantOpen] = useState(false);
+
+  // Check auto-registration link when already authenticated
+  useEffect(() => {
+    if (isAuthenticated && isAutoStoreRegistration) {
+      setIsCreateTenantOpen(true);
+    }
+  }, [isAuthenticated, isAutoStoreRegistration]);
 
   // Loading state
   if (isLoading) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#F3F6FB] dark:bg-[#0B1225] text-slate-800 dark:text-slate-100">
         <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-[#345CF3] to-[#8065E9] flex items-center justify-center text-white font-extrabold text-2xl animate-pulse shadow-xl shadow-[#345CF3]/20 mb-4">
-          R
+          V
         </div>
         <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-          Carregando ambiente RAON System...
+          Carregando ambiente Varejou...
         </p>
       </div>
     );
@@ -92,6 +110,19 @@ function AppContent() {
     switch (currentRoute) {
       case 'overview':
         return <DashboardOverview onNavigate={setCurrentRoute} />;
+      case 'pos':
+        return <PosView onNavigate={setCurrentRoute} />;
+      case 'products':
+        return <ProductsView />;
+      case 'stock':
+        return <StockView />;
+      case 'sales':
+        return <SalesHistoryView onNavigate={setCurrentRoute} />;
+      case 'receivables':
+        return <SalesHistoryView onNavigate={setCurrentRoute} />;
+      case 'clients':
+      case 'credit':
+        return <ClientsView />;
       case 'profile':
         return <ProfileView />;
       case 'settings':
@@ -166,7 +197,9 @@ export function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppContent />
+        <RetailDataProvider>
+          <AppContent />
+        </RetailDataProvider>
       </AuthProvider>
     </ThemeProvider>
   );

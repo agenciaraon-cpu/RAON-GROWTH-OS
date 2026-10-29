@@ -47,26 +47,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ],
     },
     {
-      title: 'OPERAÇÕES COMERCIAIS',
+      title: 'OPERAÇÕES DA LOJA',
       items: [
-        { id: 'pos', label: 'Frente de Caixa / PDV', icon: ShoppingCart, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'sales', label: 'Vendas', icon: ShoppingBag, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'products', label: 'Produtos', icon: Package, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'stock', label: 'Estoque', icon: Boxes, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'clients', label: 'Clientes', icon: Users, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'credit', label: 'Vendas a Prazo', icon: CreditCard, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'receivables', label: 'Contas a Receber', icon: DollarSign, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'pos', label: 'Frente de Caixa (PDV)', icon: ShoppingCart, badge: 'Caixa', badgeType: 'primary' },
+        { id: 'products', label: 'Roupas & Produtos', icon: Package, badge: 'Catálogo', badgeType: 'primary' },
+        { id: 'stock', label: 'Controle de Estoque', icon: Boxes },
+        { id: 'sales', label: 'Histórico de Vendas', icon: ShoppingBag },
+        { id: 'clients', label: 'Clientes & WhatsApp', icon: Users },
+        { id: 'credit', label: 'Crediário & A Prazo', icon: CreditCard },
       ],
     },
     {
       title: 'GESTÃO & CONTROLE',
       items: [
+        { id: 'receivables', label: 'Contas a Receber', icon: DollarSign },
         { id: 'finance', label: 'Financeiro', icon: Wallet, badge: 'Etapa 2', badgeType: 'soon' },
         { id: 'expenses', label: 'Despesas', icon: Receipt, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'inventory', label: 'Inventário', icon: ClipboardList, badge: 'Etapa 2', badgeType: 'soon' },
+        { id: 'inventory', label: 'Inventário Físico', icon: ClipboardList, badge: 'Etapa 2', badgeType: 'soon' },
         { id: 'online_catalog', label: 'Catálogo Online', icon: Globe, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'quotes', label: 'Cotações', icon: FileText, badge: 'Etapa 2', badgeType: 'soon' },
-        { id: 'deliveries', label: 'Entregas', icon: Truck, badge: 'Etapa 2', badgeType: 'soon' },
       ],
     },
     {
@@ -76,16 +74,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'team', 
           label: 'Equipe & Permissões', 
           icon: UserCheck, 
-          badge: 'Etapa 1', 
-          badgeType: 'primary',
           requiredRoles: ['owner', 'manager'] 
         },
         { 
           id: 'settings', 
-          label: 'Configurações da Empresa', 
+          label: 'Configurações da Loja', 
           icon: Settings, 
-          badge: 'Etapa 1', 
-          badgeType: 'primary',
           requiredRoles: ['owner', 'manager'] 
         },
         { id: 'reports', label: 'Relatórios', icon: BarChart3, badge: 'Etapa 2', badgeType: 'soon' },
@@ -118,21 +112,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="h-18 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-800/60">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-lg shrink-0 shadow-md shadow-app-glow">
-              L+
+            <div className="w-10 h-10 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-xl shrink-0 shadow-md shadow-app-glow">
+              V
             </div>
             {!collapsed && (
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
                   <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-base">
-                    Lucre+
+                    Varejou
                   </span>
                   <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-app-light text-app-primary uppercase tracking-wider">
                     SaaS
                   </span>
                 </div>
                 <p className="text-[10px] text-slate-400 dark:text-slate-400 truncate max-w-[170px]">
-                  Sua empresa. Seu controle.
+                  Sua loja. Seu controle.
                 </p>
               </div>
             )}
@@ -236,14 +230,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {!collapsed ? (
           <div className="px-2 py-1 text-center">
             <span className="text-[10px] text-slate-400 dark:text-slate-400 block font-medium">
-              Lucre+ • v1.0.0 (Etapa 1)
+              Varejou • v1.0.0
             </span>
             <span className="text-[9px] text-[#17B897] font-semibold">
               Ambiente Seguro • PostgreSQL
             </span>
           </div>
         ) : (
-          <div className="w-2 h-2 rounded-full bg-[#17B897] mx-auto" title="Lucre+ Ativo" />
+          <div className="w-2 h-2 rounded-full bg-[#17B897] mx-auto" title="Varejou Ativo" />
         )}
       </div>
     </aside>

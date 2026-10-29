@@ -60,10 +60,10 @@ export const CreateTenantModal: React.FC<CreateTenantModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Cadastrar Nova Empresa no Lucre+
+                Cadastrar Nova Loja no Varejou
               </h3>
               <p className="text-[11px] text-slate-400">
-                Os dados desta empresa serão 100% isolados no banco de dados.
+                Os dados desta loja serão 100% isolados no banco de dados.
               </p>
             </div>
           </div>

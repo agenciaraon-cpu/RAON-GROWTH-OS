@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { 
   DollarSign, TrendingUp, ShoppingBag, CreditCard, 
-  Package, AlertCircle, ArrowUpRight, ArrowRight, 
+  Package, Boxes, AlertCircle, ArrowUpRight, ArrowRight, 
   Clock, Plus, Users, ShoppingCart, ShieldCheck, 
   Sparkles, CheckCircle2, Store, Calendar, HelpCircle
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useRetailData } from '../../context/RetailDataContext';
 import { AppNavigationRoute } from '../../types';
 
 interface DashboardOverviewProps {
@@ -16,13 +17,19 @@ interface DashboardOverviewProps {
 export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate }) => {
   const { currentUser, currentTenant, currentMemberRole } = useAuth();
   const { colorThemeOption } = useTheme();
+  const { metrics, products, clients, sales } = useRetailData();
 
-  // Mode: Real Empty State vs Demo Visualization
+  // Mode: Real Store Data vs Demo Visualization
   const [showDemoMetrics, setShowDemoMetrics] = useState(false);
 
   // Get current hour for greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Bom dia' : hour < 18 ? 'Boa tarde' : 'Boa noite';
+
+  const totalStockUnits = products.reduce((acc, p) => acc + p.currentStock, 0);
+  const averageTicket = metrics.todaySalesCount > 0 
+    ? metrics.todayRevenue / metrics.todaySalesCount 
+    : 0;
 
   return (
     <div className="space-y-6">
@@ -55,7 +62,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                 {currentTenant ? currentTenant.segment : 'Varejo Comercial'}
               </span>
               <span className="text-[10px] font-bold text-amber-400 bg-amber-500/15 px-2.5 py-0.5 rounded-full border border-amber-500/30">
-                Plano Fixo Lucre+ R$ 29,90/mês
+                Plano Fixo Varejou R$ 29,90/mês
               </span>
               <span className="text-xs text-slate-400">
                 Fuso: America/Bahia
@@ -67,12 +74,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
             </h1>
             <p className="text-xs text-slate-300 flex items-center gap-1.5 mt-0.5">
               <Store className="w-3.5 h-3.5 text-[#17B897]" />
-              <span>Painel de Controle: <strong>{currentTenant?.name || 'Sua Empresa'}</strong></span>
+              <span>Painel de Controle: <strong>{currentTenant?.name || 'Sua Loja'}</strong></span>
             </p>
           </div>
         </div>
 
-        {/* Toggle Real Production Empty State vs Demo Visualization */}
+        {/* Toggle Real Live Data vs Demo Visualization */}
         <div className="relative z-10 flex items-center gap-3">
           <div className="p-1 rounded-xl bg-slate-900/80 border border-slate-700/60 flex items-center gap-1">
             <button
@@ -83,7 +90,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Dados Reais (Vazio)
+              Dados Reais da Loja
             </button>
             <button
               onClick={() => setShowDemoMetrics(true)}
@@ -106,14 +113,14 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
             <span>
-              <strong>Modo de Demonstração Isolado:</strong> Os números abaixo são exemplos visuais para pré-visualização das etapas de PDV e Estoque. Nenhum dado fictício é gravado como faturamento real.
+              <strong>Modo de Demonstração Visual:</strong> Os números abaixo são exemplos visuais. Alterne para "Dados Reais da Loja" para ver seus cadastros e vendas do PDV.
             </span>
           </div>
           <button
             onClick={() => setShowDemoMetrics(false)}
-            className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0"
+            className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0 cursor-pointer"
           >
-            Voltar aos dados reais
+            Ver dados da loja
           </button>
         </div>
       )}
@@ -131,10 +138,12 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 font-mono">
-            {showDemoMetrics ? 'R$ 2.480,50' : 'R$ 0,00'}
+            {showDemoMetrics ? 'R$ 2.480,50' : `R$ ${metrics.todayRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block">
-            {showDemoMetrics ? '14 pedidos finalizados' : 'Nenhuma venda hoje'}
+            {showDemoMetrics 
+              ? '14 pedidos finalizados' 
+              : `${metrics.todaySalesCount} ${metrics.todaySalesCount === 1 ? 'venda hoje' : 'vendas hoje'}`}
           </span>
         </div>
 
@@ -142,17 +151,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
         <div className="p-5 rounded-2xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-xs hover:border-[#17B897]/40 transition">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Faturamento Mensal
+              Faturamento do Mês
             </span>
             <div className="w-8 h-8 rounded-lg bg-[#17B897]/10 text-[#17B897] flex items-center justify-center">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-extrabold text-[#17B897] mt-2 font-mono">
-            {showDemoMetrics ? 'R$ 48.720,00' : 'R$ 0,00'}
+            {showDemoMetrics ? 'R$ 48.720,00' : `R$ ${metrics.monthRevenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block">
-            {showDemoMetrics ? '+18.4% vs mês anterior' : 'Mês atual em aberto'}
+            {showDemoMetrics ? '+18.4% vs mês anterior' : `${sales.length} vendas registradas`}
           </span>
         </div>
 
@@ -167,28 +176,28 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 font-mono">
-            {showDemoMetrics ? 'R$ 177,18' : 'R$ 0,00'}
+            {showDemoMetrics ? 'R$ 177,18' : `R$ ${averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block">
-            {showDemoMetrics ? 'Média por compra' : 'Aguardando primeiras vendas'}
+            {showDemoMetrics ? 'Média por compra' : 'Média por venda no PDV'}
           </span>
         </div>
 
-        {/* Contas a Receber */}
+        {/* Contas a Receber (Crediário) */}
         <div className="p-5 rounded-2xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-xs hover:border-amber-500/40 transition">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Contas a Receber
+              Crediário a Receber
             </span>
             <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
               <CreditCard className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-extrabold text-amber-500 mt-2 font-mono">
-            {showDemoMetrics ? 'R$ 6.340,00' : 'R$ 0,00'}
+            {showDemoMetrics ? 'R$ 6.340,00' : `R$ ${metrics.totalReceivables.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block">
-            {showDemoMetrics ? 'Crediário & boletos a vencer' : 'Sem títulos pendentes'}
+            {showDemoMetrics ? 'Crediário & boletos a vencer' : `${clients.filter(c => c.currentDebt > 0).length} clientes em débito`}
           </span>
         </div>
 
@@ -196,17 +205,17 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
         <div className="p-5 rounded-2xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 shadow-xs hover:border-cyan-500/40 transition">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-              Produtos em Estoque
+              Produtos & Roupas
             </span>
             <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center">
               <Package className="w-4 h-4" />
             </div>
           </div>
           <div className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white mt-2 font-mono">
-            {showDemoMetrics ? '1.420 un' : '0 itens'}
+            {showDemoMetrics ? '1.420 un' : `${totalStockUnits} un`}
           </div>
           <span className="text-[11px] text-slate-400 mt-1 block">
-            {showDemoMetrics ? '42 categorias ativas' : 'Catálogo não cadastrado'}
+            {showDemoMetrics ? '42 categorias ativas' : `${products.length} itens no catálogo`}
           </span>
         </div>
       </div>
@@ -260,24 +269,33 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
               </div>
             </div>
           ) : (
-            /* Honest Real Empty State */
+            /* Real State / Call to Action */
             <div className="h-56 p-8 flex flex-col items-center justify-center text-center rounded-2xl bg-slate-50 dark:bg-slate-900/40 border border-dashed border-slate-200 dark:border-slate-800">
               <div className="w-12 h-12 rounded-2xl bg-[#345CF3]/10 text-[#345CF3] flex items-center justify-center mb-3">
-                <ShoppingBag className="w-6 h-6" />
+                <ShoppingCart className="w-6 h-6" />
               </div>
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                Nenhuma venda registrada ainda
+                {sales.length > 0 ? `${sales.length} vendas registradas no sistema` : 'Frente de Caixa (PDV) Pronto para Vender'}
               </h3>
               <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                Os gráficos de vendas e lucratividade serão populados automaticamente assim que as primeiras operações do PDV forem iniciadas na Etapa 2.
+                Cadastre roupas, sapatos e produtos para lançar vendas rápidas no balcão com cálculo automático de troco e baixa no estoque.
               </p>
-              <button
-                onClick={() => onNavigate('pos')}
-                className="mt-4 px-4 py-2 rounded-xl bg-[#345CF3] text-white text-xs font-bold hover:bg-[#2849d4] transition shadow-md shadow-[#345CF3]/20 flex items-center gap-1.5"
-              >
-                <span>Conhecer Módulo Frente de Caixa (PDV)</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+              <div className="mt-4 flex items-center gap-2">
+                <button
+                  onClick={() => onNavigate('pos')}
+                  className="px-4 py-2 rounded-xl bg-[#345CF3] text-white text-xs font-bold hover:bg-[#2849d4] transition shadow-md shadow-[#345CF3]/20 flex items-center gap-1.5 cursor-pointer"
+                >
+                  <ShoppingCart className="w-3.5 h-3.5" />
+                  <span>Abrir Frente de Caixa (PDV)</span>
+                </button>
+                <button
+                  onClick={() => onNavigate('products')}
+                  className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Package className="w-3.5 h-3.5" />
+                  <span>Cadastrar Produtos</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -289,25 +307,25 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
               Atalhos Rápidos de Operação
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">
-              Acesso direto às ações de gestão da empresa
+              Ações imediatas para o dia a dia da sua loja
             </p>
           </div>
 
           <div className="space-y-2.5 my-4">
             <button
-              onClick={() => onNavigate('team')}
+              onClick={() => onNavigate('pos')}
               className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition text-left flex items-center justify-between group cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-[#345CF3]/10 text-[#345CF3] flex items-center justify-center">
-                  <Users className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
-                    Convidar Colaborador
+                    Frente de Caixa (PDV)
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    Definir papel (Gerente, Caixa, Vendedor)
+                    Vender por dinheiro, PIX, cartão e crediário
                   </span>
                 </div>
               </div>
@@ -315,19 +333,19 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
             </button>
 
             <button
-              onClick={() => onNavigate('settings')}
+              onClick={() => onNavigate('products')}
               className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition text-left flex items-center justify-between group cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-[#17B897]/10 text-[#17B897] flex items-center justify-center">
-                  <Store className="w-4 h-4" />
+                  <Package className="w-4 h-4" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
-                    Configurar Dados da Empresa
+                    Cadastrar Roupas & Produtos
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    CNPJ, telefone, endereço e logomarca
+                    Tamanhos, cores, preço de custo, venda e lucro
                   </span>
                 </div>
               </div>
@@ -335,23 +353,43 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
             </button>
 
             <button
-              onClick={() => onNavigate('profile')}
+              onClick={() => onNavigate('clients')}
               className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition text-left flex items-center justify-between group cursor-pointer"
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-[#8065E9]/10 text-[#8065E9] flex items-center justify-center">
-                  <Plus className="w-4 h-4" />
+                  <Users className="w-4 h-4" />
                 </div>
                 <div>
                   <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
-                    Personalizar Perfil & Foto
+                    Cadastrar Clientes & WhatsApp
                   </span>
                   <span className="text-[10px] text-slate-400">
-                    Upload de avatar e segurança
+                    Limite de crédito, fiado e contato direto
                   </span>
                 </div>
               </div>
               <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#8065E9] transition" />
+            </button>
+
+            <button
+              onClick={() => onNavigate('stock')}
+              className="w-full p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 dark:bg-slate-850 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700/60 transition text-left flex items-center justify-between group cursor-pointer"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center">
+                  <Boxes className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-100 block">
+                    Controle de Estoque & Reposição
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    Ajustes de entrada/saída e alerta de estoque baixo
+                  </span>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-cyan-500 transition" />
             </button>
           </div>
 
