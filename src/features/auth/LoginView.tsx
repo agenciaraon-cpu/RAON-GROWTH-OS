@@ -70,9 +70,12 @@ export const LoginView: React.FC<LoginViewProps> = ({
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img 
-              src="/assets/aistudio/logovarejo_0f870eab.png" 
+              src="/logovarejo.png" 
               alt="Varejou" 
-              className="h-12 w-auto object-contain filter drop-shadow-md"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/assets/aistudio/logovarejo_0f870eab.png';
+              }}
+              className="h-12 w-auto object-contain"
             />
           </div>
           <span className="text-[11px] font-semibold text-slate-400">
@@ -82,12 +85,15 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
         {/* Centro: Imagem top.png em destaque, grande, centralizada e sem nenhuma borda */}
         <div className="my-6 relative z-10 space-y-6 max-w-xl mx-auto w-full text-center">
-          {/* Imagem top.png Grande, Centralizada e Chamativa (Sem bordas, fundo transparente) */}
-          <div className="flex justify-center items-center w-full py-1">
+          {/* Imagem top.png Grande, Centralizada e Chamativa (Sem nenhuma borda, fundo 100% transparente) */}
+          <div className="w-full flex justify-center items-center py-2">
             <img 
-              src="/assets/aistudio/top_3c38211a.png" 
+              src="/top.png" 
               alt="Varejou — Gestão Comercial" 
-              className="w-full max-w-[440px] sm:max-w-[500px] h-auto object-contain select-none transform hover:scale-103 transition-transform duration-300 filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] pointer-events-auto"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/assets/aistudio/top_3c38211a.png';
+              }}
+              className="w-full max-w-[520px] sm:max-w-[580px] h-auto object-contain select-none transform hover:scale-102 transition-transform duration-300 pointer-events-auto"
             />
           </div>
 
@@ -153,8 +159,11 @@ export const LoginView: React.FC<LoginViewProps> = ({
           <div className="text-center sm:text-left space-y-2">
             <div className="flex items-center justify-center sm:justify-start gap-2 mb-2 lg:hidden">
               <img 
-                src="/assets/aistudio/logovarejo_0f870eab.png" 
+                src="/logovarejo.png" 
                 alt="Varejou" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/assets/aistudio/logovarejo_0f870eab.png';
+                }}
                 className="h-10 w-auto object-contain"
               />
             </div>

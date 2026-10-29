@@ -108,7 +108,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         collapsed ? 'w-20' : 'w-72'
       } bg-[#FFFFFF] dark:bg-[#0B1225] border-slate-200 dark:border-slate-800/80 shadow-xs`}
     >
-      {/* Brand Header com Imagem Normal (logovarejo) */}
+      {/* Brand Header com Imagem Normal (logovarejo.png) */}
       <div>
         <div className="flex items-center justify-between p-3 pb-2 border-0">
           {!collapsed ? (
@@ -122,9 +122,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
               <div className="w-full flex justify-center items-center py-1">
                 <img 
-                  src="/assets/aistudio/logovarejo_0f870eab.png" 
+                  src="/logovarejo.png" 
                   alt="Varejou" 
-                  className="h-14 sm:h-16 w-auto max-w-[190px] object-contain mx-auto select-none transform hover:scale-105 transition-all duration-300 pointer-events-auto filter drop-shadow-sm" 
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = '/assets/aistudio/logovarejo_0f870eab.png';
+                  }}
+                  className="h-16 w-auto max-w-[195px] object-contain mx-auto select-none transform hover:scale-105 transition-all duration-300 pointer-events-auto" 
                 />
               </div>
               <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mt-1">
@@ -141,9 +144,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <ChevronRight className="w-4 h-4" />
               </button>
               <img 
-                src="/assets/aistudio/logovarejo_0f870eab.png" 
+                src="/logovarejo.png" 
                 alt="Varejou" 
-                className="w-10 h-10 object-contain mx-auto select-none filter drop-shadow-xs" 
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/assets/aistudio/logovarejo_0f870eab.png';
+                }}
+                className="w-11 h-11 object-contain mx-auto select-none" 
               />
             </div>
           )}
