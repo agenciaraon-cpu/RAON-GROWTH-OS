@@ -80,17 +80,15 @@ export const LoginView: React.FC<LoginViewProps> = ({
           </span>
         </div>
 
-        {/* Centro: Logomarca Maior em Destaque + Chamada Principal + Valor + Botão Grande */}
-        <div className="my-8 relative z-10 space-y-6 max-w-xl mx-auto w-full text-center lg:text-left">
-          {/* Imagem Maior da Logomarca Varejou */}
-          <div className="flex justify-center lg:justify-start">
-            <div className="p-3 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-md shadow-2xl inline-block">
-              <img 
-                src="/assets/aistudio/logovarejo_0f870eab.png" 
-                alt="Logomarca Varejou" 
-                className="w-36 sm:w-44 h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-300"
-              />
-            </div>
+        {/* Centro: Imagem top.png em destaque, grande, centralizada e sem nenhuma borda */}
+        <div className="my-6 relative z-10 space-y-6 max-w-xl mx-auto w-full text-center">
+          {/* Imagem top.png Grande, Centralizada e Chamativa (Sem bordas, fundo transparente) */}
+          <div className="flex justify-center items-center w-full py-1">
+            <img 
+              src="/assets/aistudio/top_3c38211a.png" 
+              alt="Varejou — Gestão Comercial" 
+              className="w-full max-w-[440px] sm:max-w-[500px] h-auto object-contain select-none transform hover:scale-103 transition-transform duration-300 filter drop-shadow-[0_15px_30px_rgba(0,0,0,0.5)] pointer-events-auto"
+            />
           </div>
 
           {/* Título Principal */}
