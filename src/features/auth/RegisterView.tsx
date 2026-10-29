@@ -66,9 +66,11 @@ export const RegisterView: React.FC<RegisterViewProps> = ({
           </button>
 
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-base shadow-md shadow-app-glow">
-              V
-            </div>
+            <img 
+              src="/assets/aistudio/logovarejo_0f870eab.png" 
+              alt="Varejou" 
+              className="w-10 h-10 object-contain rounded-xl shrink-0 filter drop-shadow-sm" 
+            />
             <div>
               <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
                 Criar conta no Varejou

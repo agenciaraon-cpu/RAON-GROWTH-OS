@@ -102,6 +102,16 @@ export const Header: React.FC<HeaderProps> = ({
     >
       {/* Left: Tenant Selector & Global Search */}
       <div className="flex items-center gap-4 flex-1 max-w-xl">
+        {collapsed && (
+          <div className="flex items-center gap-2 shrink-0">
+            <img 
+              src="/assets/aistudio/logovarejo_0f870eab.png" 
+              alt="Varejou" 
+              className="h-8 w-auto object-contain"
+            />
+          </div>
+        )}
+
         {/* Tenant Selector */}
         <div className="relative" ref={tenantMenuRef}>
           <button

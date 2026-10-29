@@ -58,9 +58,11 @@ function AppContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#F3F6FB] dark:bg-[#0B1225] text-slate-800 dark:text-slate-100">
-        <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-[#345CF3] to-[#8065E9] flex items-center justify-center text-white font-extrabold text-2xl animate-pulse shadow-xl shadow-[#345CF3]/20 mb-4">
-          V
-        </div>
+        <img 
+          src="/assets/aistudio/logovarejo_0f870eab.png" 
+          alt="Varejou" 
+          className="w-16 h-16 object-contain animate-pulse mb-4 filter drop-shadow-xl" 
+        />
         <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
           Carregando ambiente Varejou...
         </p>

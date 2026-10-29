@@ -112,9 +112,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="h-18 flex items-center justify-between px-4 border-b border-slate-100 dark:border-slate-800/60">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-app-gradient flex items-center justify-center text-white font-black text-xl shrink-0 shadow-md shadow-app-glow">
-              V
-            </div>
+            <img 
+              src="/assets/aistudio/logovarejo_0f870eab.png" 
+              alt="Varejou" 
+              className="w-10 h-10 object-contain rounded-xl shrink-0 filter drop-shadow-sm" 
+            />
             {!collapsed && (
               <div className="truncate">
                 <div className="flex items-center gap-1.5">
