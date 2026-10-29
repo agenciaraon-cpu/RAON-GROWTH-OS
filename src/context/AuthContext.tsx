@@ -372,11 +372,73 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setCurrentUser(adminProfile);
         setUserTenants(SANDBOX_TENANTS);
         setCurrentTenantId(SANDBOX_TENANTS[0].id);
+        localStorage.setItem('raon_user', JSON.stringify(adminProfile));
+        localStorage.setItem('raon_tenants', JSON.stringify(SANDBOX_TENANTS));
+        localStorage.setItem('raon_current_tenant_id', SANDBOX_TENANTS[0].id);
         setIsLoading(false);
         return { success: true };
       } else {
         setIsLoading(false);
         return { success: false, error: 'Senha incorreta para o administrador geral.' };
+      }
+    }
+
+    // 2. Usuário Comum com Acesso Totalmente Liberado (somosraon@gmail.com com 12345678)
+    if (cleanEmail === 'somosraon@gmail.com') {
+      if (cleanPassword === '12345678') {
+        const commonUserStore: Tenant = {
+          id: 'tenant-somosraon',
+          name: 'Loja Varejou RAON',
+          slug: 'loja-varejou-raon',
+          legalName: 'RAON Moda & Comércio LTDA',
+          documentNumber: '34.567.890/0001-12',
+          email: 'somosraon@gmail.com',
+          phone: '(75) 98864-4742',
+          segment: 'Moda, Calçados & Variedades',
+          status: 'active',
+          logoUrl: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        const commonUserProfile: Profile = {
+          id: 'user-somosraon',
+          email: 'somosraon@gmail.com',
+          fullName: 'Usuário Varejou (RAON)',
+          phone: '(75) 98864-4742',
+          isPlatformAdmin: false, // Usuário comum da loja (não é admin geral)
+          paymentStatus: 'confirmed', // Acesso 100% liberado sem bloqueio de pagamento!
+          storeName: 'Loja Varejou RAON',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        const commonUserMember: TenantMember = {
+          id: 'tm-somosraon',
+          tenantId: commonUserStore.id,
+          userId: commonUserProfile.id,
+          roleId: 'role-owner',
+          roleCode: 'owner',
+          roleName: 'Proprietário',
+          status: 'active',
+          userName: commonUserProfile.fullName,
+          userEmail: commonUserProfile.email,
+          userPhone: '(75) 98864-4742',
+          createdAt: new Date().toISOString(),
+        };
+
+        setCurrentUser(commonUserProfile);
+        setUserTenants([commonUserStore]);
+        setCurrentTenantId(commonUserStore.id);
+        setTenantMembers(prev => [commonUserMember, ...prev.filter(m => m.tenantId !== commonUserStore.id)]);
+        localStorage.setItem('raon_user', JSON.stringify(commonUserProfile));
+        localStorage.setItem('raon_tenants', JSON.stringify([commonUserStore]));
+        localStorage.setItem('raon_current_tenant_id', commonUserStore.id);
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return { success: false, error: 'Senha incorreta para o usuário somosraon@gmail.com.' };
       }
     }
 
