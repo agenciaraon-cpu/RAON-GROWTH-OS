@@ -60,6 +60,7 @@ const INITIAL_DEMO_PRODUCTS = (tenantId: string): Product[] => [
     currentStock: 18,
     minStock: 5,
     imageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=400&auto=format&fit=crop&q=80'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -77,6 +78,7 @@ const INITIAL_DEMO_PRODUCTS = (tenantId: string): Product[] => [
     currentStock: 12,
     minStock: 4,
     imageUrl: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=400&auto=format&fit=crop&q=80'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -94,6 +96,7 @@ const INITIAL_DEMO_PRODUCTS = (tenantId: string): Product[] => [
     currentStock: 8,
     minStock: 3,
     imageUrl: 'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&auto=format&fit=crop&q=80'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -111,6 +114,7 @@ const INITIAL_DEMO_PRODUCTS = (tenantId: string): Product[] => [
     currentStock: 4,
     minStock: 5,
     imageUrl: 'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1549298916-b41d501d3772?w=400&auto=format&fit=crop&q=80'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
@@ -128,53 +132,69 @@ const INITIAL_DEMO_PRODUCTS = (tenantId: string): Product[] => [
     currentStock: 2,
     minStock: 3,
     imageUrl: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&auto=format&fit=crop&q=80',
+    images: ['https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=400&auto=format&fit=crop&q=80'],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
 ];
 
-// Initial starter clients
-const INITIAL_DEMO_CLIENTS = (tenantId: string): Client[] => [
-  {
-    id: `cli-${tenantId}-1`,
-    tenantId,
-    name: 'Mariana Vasconcelos',
-    phone: '(71) 99234-5678',
-    email: 'mariana.vasconcelos@email.com',
-    cpf: '123.456.789-01',
-    address: 'Rua das Flores, 142 - Pituba',
-    creditLimit: 600.0,
-    currentDebt: 120.0,
-    notes: 'Cliente vip de moda feminina, compra no crediário',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: `cli-${tenantId}-2`,
-    tenantId,
-    name: 'Carlos Eduardo Mendes',
-    phone: '(75) 98877-6655',
-    email: 'carlos.mendes@email.com',
-    cpf: '987.654.321-00',
-    address: 'Av. Senhor do Bonfim, 88 - Centro',
-    creditLimit: 400.0,
-    currentDebt: 0.0,
-    notes: 'Paga sempre pontual no PIX',
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: `cli-${tenantId}-3`,
-    tenantId,
-    name: 'Ana Paula Ribeiro',
-    phone: '(71) 98112-3344',
-    email: 'ana.ribeiro@email.com',
-    cpf: '456.789.123-55',
-    address: 'Rua da Bahia, 500 - Ondina',
-    creditLimit: 800.0,
-    currentDebt: 240.0,
-    notes: 'Em débito há 5 dias - envio de lembrete cordial',
-    createdAt: new Date().toISOString(),
-  },
-];
+// Initial starter clients with birthDate for birthday promotions
+const INITIAL_DEMO_CLIENTS = (tenantId: string): Client[] => {
+  const now = new Date();
+  const formatMonthDay = (d: Date) =>
+    `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
+  const todayMD = formatMonthDay(now);
+  const plus2Days = new Date(now);
+  plus2Days.setDate(now.getDate() + (now.getDay() === 6 ? -1 : 1)); // stays in same week
+  const weekMD = formatMonthDay(plus2Days);
+  const monthOtherDay = `${String(now.getMonth() + 1).padStart(2, '0')}-${now.getDate() >= 25 ? '05' : '28'}`;
+
+  return [
+    {
+      id: `cli-${tenantId}-1`,
+      tenantId,
+      name: 'Mariana Vasconcelos',
+      phone: '(71) 99234-5678',
+      email: 'mariana.vasconcelos@email.com',
+      cpf: '123.456.789-01',
+      birthDate: `1994-${todayMD}`,
+      address: 'Rua das Flores, 142 - Pituba',
+      creditLimit: 600.0,
+      currentDebt: 120.0,
+      notes: 'Cliente vip de moda feminina, compra no crediário',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `cli-${tenantId}-2`,
+      tenantId,
+      name: 'Carlos Eduardo Mendes',
+      phone: '(75) 98877-6655',
+      email: 'carlos.mendes@email.com',
+      cpf: '987.654.321-00',
+      birthDate: `1990-${weekMD}`,
+      address: 'Av. Senhor do Bonfim, 88 - Centro',
+      creditLimit: 400.0,
+      currentDebt: 0.0,
+      notes: 'Paga sempre pontual no PIX',
+      createdAt: new Date().toISOString(),
+    },
+    {
+      id: `cli-${tenantId}-3`,
+      tenantId,
+      name: 'Ana Paula Ribeiro',
+      phone: '(71) 98112-3344',
+      email: 'ana.ribeiro@email.com',
+      cpf: '456.789.123-55',
+      birthDate: `1997-${monthOtherDay}`,
+      address: 'Rua da Bahia, 500 - Ondina',
+      creditLimit: 800.0,
+      currentDebt: 240.0,
+      notes: 'Em débito há 5 dias - envio de lembrete cordial',
+      createdAt: new Date().toISOString(),
+    },
+  ];
+};
 
 export const RetailDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentTenant, currentUser } = useAuth();
@@ -261,8 +281,12 @@ export const RetailDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Product Actions
   const addProduct = async (data: Omit<Product, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>): Promise<Product> => {
+    const cleanImages = (data.images || []).filter(Boolean).slice(0, 2);
+    const primaryImage = cleanImages[0] || data.imageUrl;
     const newProduct: Product = {
       ...data,
+      images: cleanImages.length > 0 ? cleanImages : (primaryImage ? [primaryImage] : []),
+      imageUrl: primaryImage,
       id: `prod-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       tenantId: currentTenant?.id || 'default',
       createdAt: new Date().toISOString(),
@@ -273,9 +297,22 @@ export const RetailDataProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const updateProduct = async (id: string, updates: Partial<Product>) => {
-    const updated = products.map(p => 
-      p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p
-    );
+    const updated = products.map(p => {
+      if (p.id !== id) return p;
+      const nextImages = updates.images !== undefined
+        ? updates.images.filter(Boolean).slice(0, 2)
+        : p.images;
+      const nextImageUrl = updates.images !== undefined
+        ? (nextImages && nextImages[0] ? nextImages[0] : undefined)
+        : (updates.imageUrl !== undefined ? updates.imageUrl : p.imageUrl);
+      return {
+        ...p,
+        ...updates,
+        images: nextImages,
+        imageUrl: nextImageUrl,
+        updatedAt: new Date().toISOString(),
+      };
+    });
     saveProducts(updated);
   };
 

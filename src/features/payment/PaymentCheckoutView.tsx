@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import QRCode from 'qrcode';
 import { 
   QrCode, CheckCircle2, ShieldCheck, 
-  Copy, Check, Clock, MessageCircle, AlertCircle, 
+  Copy, Check, Clock, AlertCircle, 
   Sparkles, Lock, ArrowRight, LogOut, RefreshCw,
   Zap, Building2, User, CheckCheck, ChevronDown
 } from 'lucide-react';
@@ -31,7 +31,6 @@ export const PaymentCheckoutView: React.FC = () => {
   const [timeRemaining, setTimeRemaining] = useState(15 * 60); // 15 minutos
   const [monitoringCount, setMonitoringCount] = useState(0);
 
-  const supportPhone = '5575988644742';
   const planPrice = 29.90;
 
   // 1. Gera o Payload EMV Oficial e o QR Code em alta resolução
@@ -119,14 +118,6 @@ export const PaymentCheckoutView: React.FC = () => {
     setTimeout(async () => {
       await confirmPayment('pix', txId);
     }, 2200);
-  };
-
-  const handleOpenSupport = () => {
-    const storeName = currentTenant?.name || currentUser?.storeName || 'Minha Loja';
-    const text = encodeURIComponent(
-      `Olá! Estou na tela de pagamento Pix do Varejou (Loja: ${storeName}, E-mail: ${currentUser?.email}) e preciso de suporte com o Pix.`
-    );
-    window.open(`https://wa.me/${supportPhone}?text=${text}`, '_blank');
   };
 
   // Tela de Confirmação e Sucesso com Liberação Imediata
@@ -429,31 +420,6 @@ export const PaymentCheckoutView: React.FC = () => {
             <p className="text-[11px] text-center text-slate-500 dark:text-slate-400 mt-2">
               Clique acima após efetuar a transferência para o sistema validar e liberar o seu acesso instantaneamente.
             </p>
-          </div>
-
-          {/* Banner de Suporte no WhatsApp (Número oficial: 5575988644742) */}
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                <MessageCircle className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="font-bold text-slate-800 dark:text-slate-200 block">
-                  Dúvidas com o Pix? Fale com nosso suporte
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                  WhatsApp: (75) 98864-4742 (Atendimento Online)
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleOpenSupport}
-              className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 transition shrink-0 cursor-pointer shadow-xs"
-            >
-              <span>Suporte</span>
-            </button>
           </div>
 
         </div>

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { 
-  Users, UserPlus, Phone, Mail, MapPin, 
-  DollarSign, CheckCircle2, AlertCircle, Edit, 
-  Trash2, Search, MessageSquare, Receipt, X, ArrowRight
+  Users, UserPlus, Edit, Trash2, Search, 
+  MessageSquare, Receipt, X, AlertCircle, Cake, Calendar
 } from 'lucide-react';
 import { useRetailData } from '../../context/RetailDataContext';
 import { useAuth } from '../../context/AuthContext';
 import { Client } from '../../types';
+import { 
+  formatBirthDateBR, formatCPF, formatPhoneBR, 
+  matchesBirthDateQuery, analyzeClientBirthday 
+} from '../../lib/birthdays';
 
 export const ClientsView: React.FC = () => {
   const { clients, addClient, updateClient, deleteClient, recordClientPayment } = useRetailData();
@@ -28,6 +31,7 @@ export const ClientsView: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [cpf, setCpf] = useState('');
+  const [birthDate, setBirthDate] = useState('');
   const [address, setAddress] = useState('');
   const [creditLimit, setCreditLimit] = useState('500.00');
   const [currentDebt, setCurrentDebt] = useState('0.00');
@@ -40,6 +44,7 @@ export const ClientsView: React.FC = () => {
     setPhone('');
     setEmail('');
     setCpf('');
+    setBirthDate('');
     setAddress('');
     setCreditLimit('500.00');
     setCurrentDebt('0.00');
@@ -54,6 +59,7 @@ export const ClientsView: React.FC = () => {
     setPhone(c.phone);
     setEmail(c.email || '');
     setCpf(c.cpf || '');
+    setBirthDate(c.birthDate || '');
     setAddress(c.address || '');
     setCreditLimit(c.creditLimit.toString());
     setCurrentDebt(c.currentDebt.toString());
@@ -85,6 +91,7 @@ export const ClientsView: React.FC = () => {
         phone: phone.trim(),
         email: email.trim() || undefined,
         cpf: cpf.trim() || undefined,
+        birthDate: birthDate || undefined,
         address: address.trim() || undefined,
         creditLimit: limit,
         currentDebt: debt,
@@ -96,6 +103,7 @@ export const ClientsView: React.FC = () => {
         phone: phone.trim(),
         email: email.trim() || undefined,
         cpf: cpf.trim() || undefined,
+        birthDate: birthDate || undefined,
         address: address.trim() || undefined,
         creditLimit: limit,
         currentDebt: debt,
@@ -122,10 +130,15 @@ export const ClientsView: React.FC = () => {
   };
 
   const filteredClients = clients.filter(c => {
-    const matchesSearch = 
-      c.name.toLowerCase().includes(search.toLowerCase()) ||
-      c.phone.includes(search) ||
-      (c.cpf && c.cpf.includes(search));
+    const q = search.trim().toLowerCase();
+    const qDigits = q.replace(/\D/g, '');
+    const matchesSearch = !q || (
+      c.name.toLowerCase().includes(q) ||
+      c.phone.toLowerCase().includes(q) ||
+      (qDigits && c.phone.replace(/\D/g, '').includes(qDigits)) ||
+      (c.cpf && (c.cpf.includes(q) || (qDigits && c.cpf.replace(/\D/g, '').includes(qDigits)))) ||
+      matchesBirthDateQuery(c.birthDate, q)
+    );
 
     if (filterDebt === 'em_debito') return matchesSearch && c.currentDebt > 0;
     if (filterDebt === 'em_dia') return matchesSearch && c.currentDebt === 0;
@@ -151,7 +164,7 @@ export const ClientsView: React.FC = () => {
             Cadastro de Clientes & Vendas a Prazo
           </h1>
           <p className="text-xs text-slate-300 max-w-xl mt-1">
-            Cadastre clientes, consulte histórico, gerencie limites de crediário/fiado e receba pagamentos parciais ou totais.
+            Cadastre clientes com CPF e data de nascimento para promoções e avisos de aniversário, e gerencie crediário/fiado.
           </p>
         </div>
 
@@ -179,17 +192,17 @@ export const ClientsView: React.FC = () => {
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           <input
             type="text"
-            placeholder="Buscar por nome, telefone/WhatsApp ou CPF do cliente..."
+            placeholder="Buscar por nome, celular/WhatsApp, CPF ou data de aniversário..."
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs text-slate-900 dark:text-white outline-hidden focus:border-app-primary"
           />
         </div>
 
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs overflow-x-auto">
           <button
             onClick={() => setFilterDebt('todos')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer shrink-0 ${
               filterDebt === 'todos'
                 ? 'bg-app-primary text-white shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
@@ -199,7 +212,7 @@ export const ClientsView: React.FC = () => {
           </button>
           <button
             onClick={() => setFilterDebt('em_debito')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer shrink-0 ${
               filterDebt === 'em_debito'
                 ? 'bg-amber-500 text-white shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
@@ -209,7 +222,7 @@ export const ClientsView: React.FC = () => {
           </button>
           <button
             onClick={() => setFilterDebt('em_dia')}
-            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl font-bold transition cursor-pointer shrink-0 ${
               filterDebt === 'em_dia'
                 ? 'bg-emerald-500 text-white shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200'
@@ -229,7 +242,8 @@ export const ClientsView: React.FC = () => {
                 <th className="py-3 px-4">Nome do Cliente</th>
                 <th className="py-3 px-4">Contato / WhatsApp</th>
                 <th className="py-3 px-4">CPF / Endereço</th>
-                <th className="py-3 px-4">Limite de Crédito</th>
+                <th className="py-3 px-4">Nascimento</th>
+                <th className="py-3 px-4">Limite</th>
                 <th className="py-3 px-4">Saldo Devedor</th>
                 <th className="py-3 px-4 text-right">Ações</th>
               </tr>
@@ -238,12 +252,20 @@ export const ClientsView: React.FC = () => {
               {filteredClients.map(c => {
                 const hasDebt = c.currentDebt > 0;
                 const cleanPhone = c.phone.replace(/\D/g, '');
+                const bday = analyzeClientBirthday(c);
 
                 return (
                   <tr key={c.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition">
                     <td className="py-3 px-4">
-                      <div className="font-bold text-slate-900 dark:text-white">
-                        {c.name}
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 dark:text-white">
+                          {c.name}
+                        </span>
+                        {bday?.isToday && (
+                          <span className="px-1.5 py-0.5 rounded-full bg-rose-500/15 text-rose-600 dark:text-rose-400 text-[9px] font-extrabold inline-flex items-center gap-1">
+                            <Cake className="w-2.5 h-2.5" /> Hoje!
+                          </span>
+                        )}
                       </div>
                       {c.notes && (
                         <span className="text-[10px] text-slate-400 block truncate max-w-xs">
@@ -278,6 +300,23 @@ export const ClientsView: React.FC = () => {
                     </td>
 
                     <td className="py-3 px-4 font-mono">
+                      {c.birthDate ? (
+                        <div>
+                          <span className="text-slate-800 dark:text-slate-200 font-bold block">
+                            {formatBirthDateBR(c.birthDate)}
+                          </span>
+                          {bday?.isThisMonth && (
+                            <span className="text-[9px] text-rose-500 font-sans font-bold">
+                              {bday.isToday ? 'Aniversariante do dia!' : bday.isThisWeek ? 'Aniversário esta semana' : 'Aniversariante do mês'}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 font-sans text-[11px]">Não informada</span>
+                      )}
+                    </td>
+
+                    <td className="py-3 px-4 font-mono">
                       <span className="text-slate-800 dark:text-slate-200">R$ {c.creditLimit.toFixed(2)}</span>
                     </td>
 
@@ -304,7 +343,7 @@ export const ClientsView: React.FC = () => {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => openEditModal(c)}
-                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                          className="p-1.5 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                           title="Editar Cliente"
                         >
                           <Edit className="w-3.5 h-3.5" />
@@ -316,7 +355,7 @@ export const ClientsView: React.FC = () => {
                               deleteClient(c.id);
                             }
                           }}
-                          className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
+                          className="p-1.5 rounded-lg text-red-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition cursor-pointer"
                           title="Excluir Cliente"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -336,7 +375,7 @@ export const ClientsView: React.FC = () => {
             <p className="text-xs">Nenhum cliente cadastrado no momento.</p>
             <button
               onClick={openNewClientModal}
-              className="text-xs font-bold text-app-primary hover:underline"
+              className="text-xs font-bold text-app-primary hover:underline cursor-pointer"
             >
               + Cadastrar primeiro cliente agora
             </button>
@@ -358,13 +397,13 @@ export const ClientsView: React.FC = () => {
                     {editingClient ? 'Editar Cliente' : 'Cadastrar Novo Cliente'}
                   </h3>
                   <p className="text-xs text-slate-400">
-                    Dados de contato e controle de limite de crediário.
+                    Dados para atendimento, promoções, aniversários e crediário.
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsClientModalOpen(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -402,36 +441,51 @@ export const ClientsView: React.FC = () => {
                     required
                     placeholder="(71) 99999-8888"
                     value={phone}
-                    onChange={e => setPhone(e.target.value)}
+                    onChange={e => setPhone(formatPhoneBR(e.target.value))}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs font-mono"
                   />
                 </div>
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                    CPF (Opcional)
+                    CPF (para promoções e cadastro)
                   </label>
                   <input
                     type="text"
                     placeholder="000.000.000-00"
                     value={cpf}
-                    onChange={e => setCpf(e.target.value)}
+                    onChange={e => setCpf(formatCPF(e.target.value))}
                     className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs font-mono"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                  E-mail
-                </label>
-                <input
-                  type="email"
-                  placeholder="amanda@email.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5 text-rose-500" />
+                    <span>Data de Nascimento (Aniversário)</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={birthDate}
+                    onChange={e => setBirthDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-900 dark:text-white outline-hidden focus:border-app-primary"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    E-mail
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="amanda@email.com"
+                    value={email}
+                    onChange={e => setEmail(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-700 text-xs"
+                  />
+                </div>
               </div>
 
               <div>
@@ -492,7 +546,7 @@ export const ClientsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsClientModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -518,7 +572,7 @@ export const ClientsView: React.FC = () => {
                 <Receipt className="w-4 h-4 text-emerald-500" />
                 <span>Receber Pagamento de Crediário</span>
               </h3>
-              <button onClick={() => setPayingClient(null)}>
+              <button onClick={() => setPayingClient(null)} className="cursor-pointer">
                 <X className="w-4 h-4 text-slate-400" />
               </button>
             </div>
@@ -554,7 +608,7 @@ export const ClientsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setPaymentAmount(payingClient.currentDebt.toString())}
-                  className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200"
+                  className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-200 cursor-pointer"
                 >
                   Quitar Total
                 </button>

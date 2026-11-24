@@ -442,7 +442,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // 2. Check registered accounts in localStorage
+    // 2.5. Cliente Liberada para Cadastrar Loja (sandradanila@hotmail.com com 12345678)
+    if (cleanEmail === 'sandradanila@hotmail.com') {
+      if (cleanPassword === '12345678') {
+        const userStoresKey = `varejou_user_tenants_${cleanEmail}`;
+        let savedTenants: Tenant[] = [];
+        try {
+          const raw = localStorage.getItem(userStoresKey);
+          if (raw) savedTenants = JSON.parse(raw);
+        } catch (e) {}
+
+        const clientProfile: Profile = {
+          id: 'user-sandra-danila',
+          email: 'sandradanila@hotmail.com',
+          fullName: 'Sandra Danila',
+          phone: '',
+          isPlatformAdmin: false, // Cliente comum (não é admin)
+          paymentStatus: 'confirmed', // Liberada sem precisar fazer pagamento!
+          storeName: savedTenants[0]?.name,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        setCurrentUser(clientProfile);
+        setUserTenants(savedTenants);
+        setCurrentTenantId(savedTenants[0]?.id || '');
+        localStorage.setItem('raon_user', JSON.stringify(clientProfile));
+        localStorage.setItem('raon_tenants', JSON.stringify(savedTenants));
+        localStorage.setItem('raon_current_tenant_id', savedTenants[0]?.id || '');
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return { success: false, error: 'Senha incorreta para o usuário sandradanila@hotmail.com.' };
+      }
+    }
+
+    // 3. Check registered accounts in localStorage
     const accountsJson = localStorage.getItem('varejou_registered_accounts');
     if (accountsJson) {
       try {
@@ -557,7 +593,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { success: false, error: 'Este e-mail já está cadastrado. Faça login ou utilize outro.' };
     }
 
-    const newUserId = `user-${Date.now()}`;
+    const isPaymentExempt = email === 'sandradanila@hotmail.com' || email === 'somosraon@gmail.com';
+    const newUserId = email === 'sandradanila@hotmail.com' ? 'user-sandra-danila' : `user-${Date.now()}`;
     const newTenantId = `tenant-${Date.now()}`;
 
     const newProfile: Profile = {
@@ -567,7 +604,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       phone: storeWhatsApp,
       avatarUrl: null,
       isPlatformAdmin: false,
-      paymentStatus: 'pending',
+      paymentStatus: isPaymentExempt ? 'confirmed' : 'pending',
       storeName,
       storeColor,
       createdAt: new Date().toISOString(),
@@ -580,8 +617,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       slug: storeName.toLowerCase().replace(/[^a-z0-9]/g, '-'),
       segment: 'Moda & Varejo Comercial',
       phone: storeWhatsApp,
-      status: 'pending_payment',
-      paymentStatus: 'pending',
+      status: isPaymentExempt ? 'active' : 'pending_payment',
+      paymentStatus: isPaymentExempt ? 'confirmed' : 'pending',
       accentColor: storeColor,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -610,6 +647,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       tenant: newTenant,
     });
     localStorage.setItem('varejou_registered_accounts', JSON.stringify(existingAccounts));
+    localStorage.setItem(`varejou_user_tenants_${email}`, JSON.stringify([newTenant]));
 
     setCurrentUser(newProfile);
     setUserTenants([newTenant]);
@@ -731,9 +769,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdAt: new Date().toISOString(),
     };
 
-    setUserTenants(prev => [...prev, newTenant]);
+    const updatedTenantsList = [...userTenants, newTenant];
+    setUserTenants(updatedTenantsList);
     setTenantMembers(prev => [...prev, newMembership]);
     setCurrentTenantId(newTenantId);
+    if (currentUser?.email) {
+      localStorage.setItem(`varejou_user_tenants_${currentUser.email.toLowerCase()}`, JSON.stringify(updatedTenantsList));
+    }
 
     return { success: true, tenantId: newTenantId };
   };
@@ -746,12 +788,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const updateTenant = async (tenantId: string, updates: Partial<Tenant>) => {
-    setUserTenants(prev => prev.map(t => {
-      if (t.id === tenantId) {
-        return { ...t, ...updates, updatedAt: new Date().toISOString() };
+    setUserTenants(prev => {
+      const updated = prev.map(t => {
+        if (t.id === tenantId) {
+          return { ...t, ...updates, updatedAt: new Date().toISOString() };
+        }
+        return t;
+      });
+      if (currentUser?.email) {
+        localStorage.setItem(`varejou_user_tenants_${currentUser.email.toLowerCase()}`, JSON.stringify(updated));
       }
-      return t;
-    }));
+      return updated;
+    });
   };
 
   const updateTenantSettings = async (settings: Partial<TenantSettings>) => {

@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { 
   DollarSign, TrendingUp, ShoppingBag, CreditCard, 
-  Package, Boxes, AlertCircle, ArrowUpRight, ArrowRight, 
-  Clock, Plus, Users, ShoppingCart, ShieldCheck, 
-  Sparkles, CheckCircle2, Store, Calendar, HelpCircle
+  Package, Boxes, AlertCircle, ArrowRight, 
+  Clock, Users, ShoppingCart, 
+  Sparkles, CheckCircle2, Store, Calendar, Cake, Gift, MessageSquare
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useRetailData } from '../../context/RetailDataContext';
 import { AppNavigationRoute } from '../../types';
+import { categorizeBirthdays, MONTH_NAMES_PT } from '../../lib/birthdays';
 
 interface DashboardOverviewProps {
   onNavigate: (route: AppNavigationRoute) => void;
@@ -30,6 +31,11 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
   const averageTicket = metrics.todaySalesCount > 0 
     ? metrics.todayRevenue / metrics.todaySalesCount 
     : 0;
+
+  // Birthdays analysis for Visão Geral notice
+  const now = new Date();
+  const { today: todayBirthdays, week: weekBirthdays, month: monthBirthdays } = categorizeBirthdays(clients, now);
+  const currentMonthName = MONTH_NAMES_PT[now.getMonth()];
 
   return (
     <div className="space-y-6">
@@ -217,6 +223,160 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
           <span className="text-[11px] text-slate-400 mt-1 block">
             {showDemoMetrics ? '42 categorias ativas' : `${products.length} itens no catálogo`}
           </span>
+        </div>
+      </div>
+
+      {/* 2.5. Aviso de Aniversariantes (Dia, Semana e Mês) */}
+      <div className="p-5 sm:p-6 rounded-3xl bg-white dark:bg-[#0E172E] border border-rose-500/30 shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/15 text-rose-500 flex items-center justify-center shrink-0">
+              <Cake className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm font-extrabold text-slate-900 dark:text-white">
+                  Aviso de Aniversariantes • {currentMonthName}
+                </h2>
+                {todayBirthdays.length > 0 && (
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-500 text-white uppercase tracking-wider">
+                    {todayBirthdays.length} {todayBirthdays.length === 1 ? 'faz aniversário hoje!' : 'fazem aniversário hoje!'}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Acompanhe os clientes aniversariantes do dia, da semana e do mês para enviar promoções no WhatsApp.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('birthdays')}
+            className="px-4 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold flex items-center gap-2 transition shadow-sm shrink-0 cursor-pointer"
+          >
+            <Gift className="w-4 h-4" />
+            <span>Abrir Aba de Aniversários</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          {/* Aniversariantes do Dia */}
+          <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/25 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black text-rose-500 uppercase tracking-wider">
+                Aniversariantes do Dia
+              </span>
+              <span className="text-sm font-black font-mono text-rose-500">
+                {todayBirthdays.length}
+              </span>
+            </div>
+            {todayBirthdays.length > 0 ? (
+              <div className="space-y-1.5">
+                {todayBirthdays.slice(0, 2).map(b => (
+                  <div key={b.client.id} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                      {b.client.name}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const phone = b.client.phone.replace(/\D/g, '');
+                        const msg = encodeURIComponent(
+                          `Olá ${b.client.name.split(' ')[0]}! Feliz aniversário! A ${currentTenant?.name || 'nossa loja'} preparou uma condição especial para você comemorar hoje!`
+                        );
+                        window.open(`https://wa.me/55${phone}?text=${msg}`, '_blank');
+                      }}
+                      className="px-2 py-1 rounded-lg bg-[#25D366] hover:bg-[#1ebe5b] text-white text-[10px] font-bold flex items-center gap-1 shrink-0 cursor-pointer"
+                    >
+                      <MessageSquare className="w-3 h-3" />
+                      <span>Parabéns</span>
+                    </button>
+                  </div>
+                ))}
+                {todayBirthdays.length > 2 && (
+                  <span className="text-[10px] text-rose-500 font-semibold block">
+                    +{todayBirthdays.length - 2} aniversariante(s) hoje
+                  </span>
+                )}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Nenhum cliente faz aniversário hoje.
+              </p>
+            )}
+          </div>
+
+          {/* Aniversariantes da Semana */}
+          <div className="p-4 rounded-2xl bg-violet-500/5 border border-violet-500/25 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black text-violet-500 uppercase tracking-wider">
+                Aniversariantes da Semana
+              </span>
+              <span className="text-sm font-black font-mono text-violet-500">
+                {weekBirthdays.length}
+              </span>
+            </div>
+            {weekBirthdays.length > 0 ? (
+              <div className="space-y-1">
+                {weekBirthdays.slice(0, 2).map(b => (
+                  <div key={b.client.id} className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200 truncate">
+                      {b.client.name}
+                    </span>
+                    <span className="font-mono text-[10px] font-bold text-violet-500 shrink-0">
+                      {b.formattedDayMonth}
+                    </span>
+                  </div>
+                ))}
+                {weekBirthdays.length > 2 && (
+                  <span className="text-[10px] text-violet-500 font-semibold block">
+                    +{weekBirthdays.length - 2} na semana
+                  </span>
+                )}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Nenhum aniversário programado nesta semana.
+              </p>
+            )}
+          </div>
+
+          {/* Aniversariantes do Mês */}
+          <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/25 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-wider">
+                Aniversariantes do Mês
+              </span>
+              <span className="text-sm font-black font-mono text-emerald-500">
+                {monthBirthdays.length}
+              </span>
+            </div>
+            {monthBirthdays.length > 0 ? (
+              <div className="space-y-1">
+                {monthBirthdays.slice(0, 2).map(b => (
+                  <div key={b.client.id} className="flex items-center justify-between text-xs">
+                    <span className="font-semibold text-slate-700 dark:text-slate-200 truncate">
+                      {b.client.name}
+                    </span>
+                    <span className="font-mono text-[10px] font-bold text-emerald-500 shrink-0">
+                      Dia {String(b.day).padStart(2, '0')}
+                    </span>
+                  </div>
+                ))}
+                {monthBirthdays.length > 2 && (
+                  <span className="text-[10px] text-emerald-500 font-semibold block">
+                    +{monthBirthdays.length - 2} no mês de {currentMonthName}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                Cadastre datas de nascimento dos clientes para acompanhar.
+              </p>
+            )}
+          </div>
         </div>
       </div>
 

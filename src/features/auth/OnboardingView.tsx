@@ -71,7 +71,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
             Olá, {currentUser?.fullName || 'Lojista'}! Vamos cadastrar sua loja.
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
-            Você será configurado como o <strong>Proprietário</strong> com acesso irrestrito ao sistema no <strong>Plano Fixo Varejou (R$ 29,90/mês)</strong>.
+            Você será configurado como o <strong>Proprietário</strong> com acesso irrestrito ao sistema para gerenciar sua loja no <strong>Varejou</strong>.
           </p>
         </div>
 
@@ -191,7 +191,7 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="text-xs text-[#17B897] font-semibold flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Plano Fixo Varejou R$ 29,90/mês • 14 dias grátis</span>
+              <span>Acesso liberado • Cadastre sua loja sem custos</span>
             </span>
 
             <button

@@ -145,6 +145,7 @@ export type AppNavigationRoute =
   | 'products'
   | 'stock'
   | 'clients'
+  | 'birthdays'
   | 'credit'
   | 'receivables'
   | 'finance'
@@ -178,6 +179,7 @@ export interface Product {
   currentStock: number;
   minStock: number;
   imageUrl?: string;
+  images?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -189,6 +191,7 @@ export interface Client {
   phone: string;
   email?: string;
   cpf?: string;
+  birthDate?: string; // YYYY-MM-DD
   address?: string;
   creditLimit: number;
   currentDebt: number;

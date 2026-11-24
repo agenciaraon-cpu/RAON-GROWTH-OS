@@ -2,12 +2,14 @@ import React from 'react';
 import { 
   LayoutDashboard, ShoppingCart, ShoppingBag, Package, 
   Boxes, Users, CreditCard, DollarSign, Wallet, 
-  Receipt, ClipboardList, Globe, FileText, Truck, 
+  Receipt, ClipboardList, Globe, 
   UserCheck, BarChart3, Settings, User, ShieldAlert, 
-  HelpCircle, ChevronLeft, ChevronRight, Store, Sparkles
+  HelpCircle, ChevronLeft, ChevronRight, Store, Cake
 } from 'lucide-react';
 import { AppNavigationRoute, RoleCode } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { useRetailData } from '../../context/RetailDataContext';
+import { categorizeBirthdays } from '../../lib/birthdays';
 
 interface SidebarProps {
   currentRoute: AppNavigationRoute;
@@ -37,7 +39,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
   collapsed,
   onToggleCollapse,
 }) => {
-  const { currentTenant, currentMemberRole, isPlatformAdmin, hasRole } = useAuth();
+  const { currentTenant, isPlatformAdmin, hasRole } = useAuth();
+  const { clients } = useRetailData();
+  const { today: todayBirthdays, month: monthBirthdays } = categorizeBirthdays(clients);
+
+  const birthdayBadge =
+    todayBirthdays.length > 0
+      ? `${todayBirthdays.length} Hoje`
+      : monthBirthdays.length > 0
+      ? `${monthBirthdays.length} Mês`
+      : undefined;
 
   const navigationGroups: NavGroup[] = [
     {
@@ -54,6 +65,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'stock', label: 'Controle de Estoque', icon: Boxes },
         { id: 'sales', label: 'Histórico de Vendas', icon: ShoppingBag },
         { id: 'clients', label: 'Clientes & WhatsApp', icon: Users },
+        { 
+          id: 'birthdays', 
+          label: 'Aniversários', 
+          icon: Cake, 
+          badge: birthdayBadge, 
+          badgeType: todayBirthdays.length > 0 ? 'warning' : 'primary' 
+        },
         { id: 'credit', label: 'Crediário & A Prazo', icon: CreditCard },
       ],
     },

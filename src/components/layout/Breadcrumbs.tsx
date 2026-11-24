@@ -15,6 +15,7 @@ const ROUTE_LABELS: Record<AppNavigationRoute, string> = {
   products: 'Produtos',
   stock: 'Estoque',
   clients: 'Clientes',
+  birthdays: 'Aniversários',
   credit: 'Vendas a Prazo',
   receivables: 'Contas a Receber',
   finance: 'Financeiro',

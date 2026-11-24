@@ -39,21 +39,43 @@ export const SupportView: React.FC = () => {
           O <strong>Varejou</strong> é uma plataforma SaaS de gestão comercial projetada pela <strong>RAON</strong> para atender ao comércio varejista brasileiro com máxima segurança, conformidade e velocidade operacional.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
           <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
-            <Mail className="w-4 h-4 text-[#38BDF8]" />
+            <Mail className="w-4 h-4 text-[#38BDF8] shrink-0" />
             <div className="truncate">
               <span className="text-[10px] text-slate-400 block">E-mail de Suporte</span>
               <span className="text-xs font-mono font-bold text-white">agenciaraon@gmail.com</span>
             </div>
           </div>
           <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
-            <Phone className="w-4 h-4 text-[#17B897]" />
+            <Phone className="w-4 h-4 text-[#17B897] shrink-0" />
             <div className="truncate">
-              <span className="text-[10px] text-slate-400 block">WhatsApp / Telefone</span>
+              <span className="text-[10px] text-slate-400 block">WhatsApp Suporte Oficial</span>
+              <span className="text-xs font-mono font-bold text-white">(75) 98864-4742</span>
+            </div>
+          </div>
+          <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-3">
+            <Phone className="w-4 h-4 text-emerald-400 shrink-0" />
+            <div className="truncate">
+              <span className="text-[10px] text-slate-400 block">Telefone Comercial</span>
               <span className="text-xs font-mono font-bold text-white">(71) 98303-2979</span>
             </div>
           </div>
+        </div>
+
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              const text = encodeURIComponent('Olá! Preciso de ajuda com o sistema Varejou.');
+              window.open(`https://wa.me/5575988644742?text=${text}`, '_blank');
+            }}
+            className="px-5 py-3 rounded-2xl bg-[#25D366] hover:bg-[#1ebe5b] text-white font-bold text-xs inline-flex items-center gap-2 transition shadow-lg cursor-pointer"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>Falar com o Suporte no WhatsApp</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
 

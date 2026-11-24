@@ -5,7 +5,6 @@ import { RetailDataProvider } from './context/RetailDataContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { Header } from './components/layout/Header';
 import { Breadcrumbs } from './components/layout/Breadcrumbs';
-import { FloatingWhatsAppSupport } from './components/common/FloatingWhatsAppSupport';
 
 // Features
 import { LoginView } from './features/auth/LoginView';
@@ -29,6 +28,7 @@ import { PosView } from './features/pos/PosView';
 import { ProductsView } from './features/products/ProductsView';
 import { StockView } from './features/stock/StockView';
 import { ClientsView } from './features/clients/ClientsView';
+import { BirthdaysView } from './features/clients/BirthdaysView';
 import { SalesHistoryView } from './features/sales/SalesHistoryView';
 
 import { AppNavigationRoute } from './types';
@@ -100,31 +100,18 @@ function AppContent() {
           isOpen={isSupabaseSetupOpen}
           onClose={() => setIsSupabaseSetupOpen(false)}
         />
-
-        {/* Global WhatsApp Support Floating Button */}
-        <FloatingWhatsAppSupport />
       </>
     );
   }
 
   // Acesso Bloqueado antes de confirmar pagamento (exceto Admin Geral)
   if (!hasPaidAccess) {
-    return (
-      <>
-        <PaymentCheckoutView />
-        <FloatingWhatsAppSupport />
-      </>
-    );
+    return <PaymentCheckoutView />;
   }
 
   // First access check: user has no company created yet
   if (userTenants.length === 0) {
-    return (
-      <>
-        <OnboardingView onComplete={() => setCurrentRoute('overview')} />
-        <FloatingWhatsAppSupport />
-      </>
-    );
+    return <OnboardingView onComplete={() => setCurrentRoute('overview')} />;
   }
 
   // Render view by route
@@ -145,6 +132,8 @@ function AppContent() {
       case 'clients':
       case 'credit':
         return <ClientsView />;
+      case 'birthdays':
+        return <BirthdaysView onNavigate={setCurrentRoute} />;
       case 'profile':
         return <ProfileView />;
       case 'settings':
@@ -211,9 +200,6 @@ function AppContent() {
         isOpen={isSupabaseSetupOpen}
         onClose={() => setIsSupabaseSetupOpen(false)}
       />
-
-      {/* WhatsApp Suporte em todas as partes do app */}
-      <FloatingWhatsAppSupport />
     </div>
   );
 }
