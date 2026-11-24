@@ -113,6 +113,46 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
         </div>
       </div>
 
+      {/* Alerta Automático de Aniversariantes do Mês no Dashboard Principal */}
+      {monthBirthdays.length > 0 && (
+        <div className="p-4 sm:p-5 rounded-3xl bg-linear-to-r from-rose-500/15 via-amber-500/10 to-rose-500/10 border border-rose-500/40 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-rose-500/25">
+              <Cake className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-rose-500 text-white">
+                  Alerta Automático • Aniversários de {currentMonthName}
+                </span>
+                {todayBirthdays.length > 0 && (
+                  <span className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500 text-white animate-pulse">
+                    {todayBirthdays.length} {todayBirthdays.length === 1 ? 'Aniversariante Hoje!' : 'Aniversariantes Hoje!'}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white mt-1">
+                {monthBirthdays.length} {monthBirthdays.length === 1 ? 'cliente faz aniversário neste mês' : 'clientes fazem aniversário neste mês'}:{' '}
+                <span className="font-semibold text-rose-600 dark:text-rose-300">
+                  {monthBirthdays.slice(0, 3).map(b => `${b.client.name.split(' ')[0]} (${b.formattedDayMonth})`).join(', ')}
+                  {monthBirthdays.length > 3 ? ` e +${monthBirthdays.length - 3}` : ''}
+                </span>
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onNavigate('birthdays')}
+            className="px-4 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold flex items-center gap-2 transition shadow-md shrink-0 cursor-pointer"
+          >
+            <Gift className="w-4 h-4" />
+            <span>Ver Aniversariantes</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Demo Mode Notice Banner if enabled */}
       {showDemoMetrics && (
         <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-700 dark:text-indigo-300 text-xs flex items-center justify-between">
@@ -256,7 +296,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
             className="px-4 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold flex items-center gap-2 transition shadow-sm shrink-0 cursor-pointer"
           >
             <Gift className="w-4 h-4" />
-            <span>Abrir Aba de Aniversários</span>
+            <span>Abrir Aba Aniversariantes</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -574,6 +614,31 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
           </div>
 
           <div className="space-y-3">
+            {monthBirthdays.length > 0 && (
+              <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-start justify-between gap-3">
+                <div className="flex items-start gap-3">
+                  <Cake className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-xs font-bold text-rose-600 dark:text-rose-400 block">
+                      Aniversariantes Detectados em {currentMonthName} ({monthBirthdays.length})
+                    </span>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
+                      {todayBirthdays.length > 0
+                        ? `${todayBirthdays.length} cliente(s) comemoram aniversário hoje e ${monthBirthdays.length} neste mês.`
+                        : `Você possui ${monthBirthdays.length} cliente(s) fazendo aniversário neste mês.`}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('birthdays')}
+                  className="text-[11px] font-bold text-rose-500 hover:underline shrink-0 cursor-pointer"
+                >
+                  Ver lista
+                </button>
+              </div>
+            )}
+
             <div className="p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-start gap-3">
               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               <div>
@@ -581,19 +646,7 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
                   Segurança Multiempresa Ativa
                 </span>
                 <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
-                  O tenant <strong>{currentTenant?.name}</strong> está isolado por Row Level Security no PostgreSQL. Nenhum outro lojista tem acesso aos seus dados.
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-[#345CF3]/10 border border-[#345CF3]/20 flex items-start gap-3">
-              <Sparkles className="w-4 h-4 text-[#345CF3] shrink-0 mt-0.5" />
-              <div>
-                <span className="text-xs font-bold text-[#345CF3] block">
-                  Plano Trial Ativo (14 Dias)
-                </span>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 mt-0.5">
-                  Aproveite todos os recursos comerciais e de gestão de equipe durante o período de avaliação gratuita do RAON System.
+                  A loja <strong>{currentTenant?.name}</strong> opera com isolamento exclusivo dos seus clientes, vendas e estoque.
                 </p>
               </div>
             </div>

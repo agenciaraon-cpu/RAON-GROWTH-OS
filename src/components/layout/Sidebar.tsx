@@ -67,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         { id: 'clients', label: 'Clientes & WhatsApp', icon: Users },
         { 
           id: 'birthdays', 
-          label: 'Aniversários', 
+          label: 'Aniversariantes', 
           icon: Cake, 
           badge: birthdayBadge, 
           badgeType: todayBirthdays.length > 0 ? 'warning' : 'primary' 
