@@ -38,6 +38,11 @@ const ROLES_INFO: Record<RoleCode, { name: string; desc: string; badgeColor: str
     desc: 'Contas a pagar/receber, conciliação e relatórios financeiros.',
     badgeColor: 'bg-purple-500/15 text-purple-500 border-purple-500/30',
   },
+  client: {
+    name: 'Cliente',
+    desc: 'Acesso direto de cliente para cadastrar e operar sua loja no Varejou.',
+    badgeColor: 'bg-emerald-500/15 text-emerald-500 border-emerald-500/30',
+  },
 };
 
 export const TeamManagementView: React.FC = () => {

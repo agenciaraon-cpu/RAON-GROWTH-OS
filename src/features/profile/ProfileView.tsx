@@ -224,7 +224,7 @@ export const ProfileView: React.FC = () => {
             </p>
           </div>
           <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#17B897]/15 text-[#17B897] uppercase">
-            Papel: {currentMemberRole || 'Membro'}
+            Perfil: {currentMemberRole === 'client' ? 'Cliente' : currentMemberRole === 'owner' ? 'Proprietário' : currentMemberRole || 'Cliente'}
           </span>
         </div>
 

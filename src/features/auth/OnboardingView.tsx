@@ -22,8 +22,11 @@ const SEGMENTS = [
 ];
 
 export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) => {
-  const { currentUser, createTenant } = useAuth();
+  const { currentUser, createTenant, logout } = useAuth();
   const { colorThemeOption } = useTheme();
+  const isClientAccount =
+    currentUser?.accountRole === 'client' ||
+    currentUser?.email?.toLowerCase() === 'sandradanila@hotmail.com';
 
   const [companyName, setCompanyName] = useState('');
   const [selectedSegment, setSelectedSegment] = useState('Moda & Roupas');
@@ -62,16 +65,34 @@ export const OnboardingView: React.FC<OnboardingViewProps> = ({ onComplete }) =>
       <div className="w-full max-w-2xl bg-white dark:bg-[#0E172E] border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-10 shadow-2xl space-y-6 sm:space-y-8">
         {/* Header / Stepper */}
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-app-light text-app-primary text-xs font-bold uppercase tracking-wider mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Primeiro Acesso — Varejou</span>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-app-light text-app-primary text-xs font-bold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Cadastro da Loja — Varejou</span>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="text-xs font-semibold text-slate-400 hover:text-red-500 transition cursor-pointer"
+            >
+              Sair da conta
+            </button>
           </div>
 
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">
-            Olá, {currentUser?.fullName || 'Lojista'}! Vamos cadastrar sua loja.
+            Olá, {currentUser?.fullName || 'Cliente'}! Vamos cadastrar sua loja.
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1.5">
-            Você será configurado como o <strong>Proprietário</strong> com acesso irrestrito ao sistema para gerenciar sua loja no <strong>Varejou</strong>.
+            {isClientAccount ? (
+              <>
+                Preencha os dados da sua loja abaixo para entrar e usar o <strong>Varejou</strong> como <strong>Cliente</strong>, sem necessidade de pagamento.
+              </>
+            ) : (
+              <>
+                Cadastre os dados da sua empresa para iniciar as operações da sua loja no <strong>Varejou</strong>.
+              </>
+            )}
           </p>
         </div>
 

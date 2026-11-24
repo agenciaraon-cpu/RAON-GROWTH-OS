@@ -125,7 +125,20 @@ const ROLE_NAMES: Record<RoleCode, string> = {
   sales: 'Vendedor',
   stock: 'Estoquista',
   financial: 'Financeiro',
+  client: 'Cliente',
 };
+
+function safeParseJSON<T>(raw: string | null, fallback: T): T {
+  if (!raw) return fallback;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed === null || parsed === undefined) return fallback;
+    if (Array.isArray(fallback) && !Array.isArray(parsed)) return fallback;
+    return parsed as T;
+  } catch {
+    return fallback;
+  }
+}
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -134,13 +147,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [currentUser, setCurrentUser] = useState<Profile | null>(() => {
-    const saved = localStorage.getItem('raon_user');
-    return saved ? JSON.parse(saved) : null;
+    return safeParseJSON<Profile | null>(localStorage.getItem('raon_user'), null);
   });
 
   const [userTenants, setUserTenants] = useState<Tenant[]>(() => {
-    const saved = localStorage.getItem('raon_tenants');
-    return saved ? JSON.parse(saved) : SANDBOX_TENANTS;
+    return safeParseJSON<Tenant[]>(localStorage.getItem('raon_tenants'), SANDBOX_TENANTS);
   });
 
   const [currentTenantId, setCurrentTenantId] = useState<string>(() => {
@@ -148,8 +159,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [tenantMembers, setTenantMembers] = useState<TenantMember[]>(() => {
-    const saved = localStorage.getItem('raon_tenant_members');
-    if (saved) return JSON.parse(saved);
+    const saved = safeParseJSON<TenantMember[] | null>(localStorage.getItem('raon_tenant_members'), null);
+    if (saved && saved.length > 0) return saved;
 
     return [
       {
@@ -198,13 +209,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   });
 
   const [invitations, setInvitations] = useState<TenantInvitation[]>(() => {
-    const saved = localStorage.getItem('raon_invitations');
-    return saved ? JSON.parse(saved) : [];
+    return safeParseJSON<TenantInvitation[]>(localStorage.getItem('raon_invitations'), []);
   });
 
   const [tenantSettings, setTenantSettings] = useState<TenantSettings | null>(() => {
-    const saved = localStorage.getItem(`raon_settings_${currentTenantId}`);
-    if (saved) return JSON.parse(saved);
+    const saved = safeParseJSON<TenantSettings | null>(localStorage.getItem(`raon_settings_${currentTenantId}`), null);
+    if (saved) return saved;
 
     return {
       tenantId: currentTenantId,
@@ -228,7 +238,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const currentMembership = tenantMembers.find(
     m => m.tenantId === currentTenant?.id && m.userId === currentUser?.id && m.status === 'active'
   );
-  const currentMemberRole: RoleCode | null = currentMembership ? currentMembership.roleCode : (currentUser?.isPlatformAdmin ? 'owner' : null);
+  const currentMemberRole: RoleCode | null = currentMembership
+    ? currentMembership.roleCode
+    : currentUser?.isPlatformAdmin
+    ? 'owner'
+    : currentUser?.accountRole === 'client'
+    ? 'client'
+    : null;
 
   const isPlatformAdmin = Boolean(currentUser?.isPlatformAdmin);
   const hasPaidAccess = Boolean(
@@ -314,17 +330,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('raon_invitations', JSON.stringify(invitations));
   }, [invitations]);
 
-  // Initial Auth Check
+  // Initial Auth Check (non-blocking with timeout fallback)
   useEffect(() => {
     const initAuth = async () => {
-      setIsLoading(true);
+      try {
+        const localUser = safeParseJSON<Profile | null>(localStorage.getItem('raon_user'), null);
+        if (localUser) {
+          if (localUser.email?.toLowerCase() === 'sandradanila@hotmail.com') {
+            setCurrentUser({
+              ...localUser,
+              isPlatformAdmin: false,
+              accountRole: 'client',
+              paymentStatus: 'confirmed',
+            });
+          }
+          setIsLoading(false);
+          return;
+        }
 
-      if (isSupabaseConfigured && supabase) {
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
+        if (isSupabaseConfigured && supabase) {
+          const sessionResult = await Promise.race([
+            supabase.auth.getSession(),
+            new Promise<null>(resolve => setTimeout(() => resolve(null), 1500)),
+          ]);
+
+          const session = sessionResult && 'data' in sessionResult ? sessionResult.data.session : null;
 
           if (session?.user) {
-            // Fetch profile
             const { data: profile } = await supabase
               .from('profiles')
               .select('*')
@@ -345,12 +377,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               });
             }
           }
-        } catch (err) {
-          console.warn('Supabase session load error:', err);
         }
+      } catch (err) {
+        console.warn('Auth init check skipped:', err);
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     initAuth();
@@ -358,202 +390,210 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const login = async (email: string, password?: string): Promise<{ success: boolean; error?: string }> => {
     setIsLoading(true);
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanPassword = password ? password.trim() : '';
+    try {
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPassword = password ? password.trim() : '';
 
-    // 1. Admin Geral Verification (agenciaraon@gmail.com with Spinder10#)
-    if (cleanEmail === 'agenciaraon@gmail.com') {
-      if (cleanPassword === 'Spinder10#' || cleanPassword === '12345678') {
-        const adminProfile: Profile = {
-          ...SANDBOX_PROFILES[0],
-          isPlatformAdmin: true,
-          paymentStatus: 'confirmed',
-        };
-        setCurrentUser(adminProfile);
-        setUserTenants(SANDBOX_TENANTS);
-        setCurrentTenantId(SANDBOX_TENANTS[0].id);
-        localStorage.setItem('raon_user', JSON.stringify(adminProfile));
-        localStorage.setItem('raon_tenants', JSON.stringify(SANDBOX_TENANTS));
-        localStorage.setItem('raon_current_tenant_id', SANDBOX_TENANTS[0].id);
-        setIsLoading(false);
-        return { success: true };
-      } else {
-        setIsLoading(false);
-        return { success: false, error: 'Senha incorreta para o administrador geral.' };
-      }
-    }
-
-    // 2. Usuário Comum com Acesso Totalmente Liberado (somosraon@gmail.com com 12345678)
-    if (cleanEmail === 'somosraon@gmail.com') {
-      if (cleanPassword === '12345678') {
-        const commonUserStore: Tenant = {
-          id: 'tenant-somosraon',
-          name: 'Loja Varejou RAON',
-          slug: 'loja-varejou-raon',
-          legalName: 'RAON Moda & Comércio LTDA',
-          documentNumber: '34.567.890/0001-12',
-          email: 'somosraon@gmail.com',
-          phone: '(75) 98864-4742',
-          segment: 'Moda, Calçados & Variedades',
-          status: 'active',
-          logoUrl: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        const commonUserProfile: Profile = {
-          id: 'user-somosraon',
-          email: 'somosraon@gmail.com',
-          fullName: 'Usuário Varejou (RAON)',
-          phone: '(75) 98864-4742',
-          isPlatformAdmin: false, // Usuário comum da loja (não é admin geral)
-          paymentStatus: 'confirmed', // Acesso 100% liberado sem bloqueio de pagamento!
-          storeName: 'Loja Varejou RAON',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        const commonUserMember: TenantMember = {
-          id: 'tm-somosraon',
-          tenantId: commonUserStore.id,
-          userId: commonUserProfile.id,
-          roleId: 'role-owner',
-          roleCode: 'owner',
-          roleName: 'Proprietário',
-          status: 'active',
-          userName: commonUserProfile.fullName,
-          userEmail: commonUserProfile.email,
-          userPhone: '(75) 98864-4742',
-          createdAt: new Date().toISOString(),
-        };
-
-        setCurrentUser(commonUserProfile);
-        setUserTenants([commonUserStore]);
-        setCurrentTenantId(commonUserStore.id);
-        setTenantMembers(prev => [commonUserMember, ...prev.filter(m => m.tenantId !== commonUserStore.id)]);
-        localStorage.setItem('raon_user', JSON.stringify(commonUserProfile));
-        localStorage.setItem('raon_tenants', JSON.stringify([commonUserStore]));
-        localStorage.setItem('raon_current_tenant_id', commonUserStore.id);
-        setIsLoading(false);
-        return { success: true };
-      } else {
-        setIsLoading(false);
-        return { success: false, error: 'Senha incorreta para o usuário somosraon@gmail.com.' };
-      }
-    }
-
-    // 2.5. Cliente Liberada para Cadastrar Loja (sandradanila@hotmail.com com 12345678)
-    if (cleanEmail === 'sandradanila@hotmail.com') {
-      if (cleanPassword === '12345678') {
-        const userStoresKey = `varejou_user_tenants_${cleanEmail}`;
-        let savedTenants: Tenant[] = [];
-        try {
-          const raw = localStorage.getItem(userStoresKey);
-          if (raw) savedTenants = JSON.parse(raw);
-        } catch (e) {}
-
-        const clientProfile: Profile = {
-          id: 'user-sandra-danila',
-          email: 'sandradanila@hotmail.com',
-          fullName: 'Sandra Danila',
-          phone: '',
-          isPlatformAdmin: false, // Cliente comum (não é admin)
-          paymentStatus: 'confirmed', // Liberada sem precisar fazer pagamento!
-          storeName: savedTenants[0]?.name,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        setCurrentUser(clientProfile);
-        setUserTenants(savedTenants);
-        setCurrentTenantId(savedTenants[0]?.id || '');
-        localStorage.setItem('raon_user', JSON.stringify(clientProfile));
-        localStorage.setItem('raon_tenants', JSON.stringify(savedTenants));
-        localStorage.setItem('raon_current_tenant_id', savedTenants[0]?.id || '');
-        setIsLoading(false);
-        return { success: true };
-      } else {
-        setIsLoading(false);
-        return { success: false, error: 'Senha incorreta para o usuário sandradanila@hotmail.com.' };
-      }
-    }
-
-    // 3. Check registered accounts in localStorage
-    const accountsJson = localStorage.getItem('varejou_registered_accounts');
-    if (accountsJson) {
-      try {
-        const accounts: any[] = JSON.parse(accountsJson);
-        const matched = accounts.find(acc => acc.email.toLowerCase() === cleanEmail);
-        if (matched) {
-          if (matched.password && cleanPassword && matched.password !== cleanPassword) {
-            setIsLoading(false);
-            return { success: false, error: 'Senha incorreta.' };
-          }
-          setCurrentUser(matched.profile);
-          setUserTenants([matched.tenant]);
-          setCurrentTenantId(matched.tenant.id);
-          setIsLoading(false);
+      // 1. Admin Geral Verification (agenciaraon@gmail.com with Spinder10#)
+      if (cleanEmail === 'agenciaraon@gmail.com') {
+        if (cleanPassword === 'Spinder10#' || cleanPassword === '12345678') {
+          const adminProfile: Profile = {
+            ...SANDBOX_PROFILES[0],
+            isPlatformAdmin: true,
+            accountRole: 'admin',
+            paymentStatus: 'confirmed',
+          };
+          setCurrentUser(adminProfile);
+          setUserTenants(SANDBOX_TENANTS);
+          setCurrentTenantId(SANDBOX_TENANTS[0].id);
+          localStorage.setItem('raon_user', JSON.stringify(adminProfile));
+          localStorage.setItem('raon_tenants', JSON.stringify(SANDBOX_TENANTS));
+          localStorage.setItem('raon_current_tenant_id', SANDBOX_TENANTS[0].id);
           return { success: true };
+        } else {
+          return { success: false, error: 'Senha incorreta para o administrador geral.' };
         }
-      } catch (e) {}
-    }
-
-    // 3. Supabase Live Auth (if active)
-    if (isSupabaseConfigured && supabase) {
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: cleanEmail,
-          password: cleanPassword || '12345678',
-        });
-
-        if (error) {
-          setIsLoading(false);
-          return { success: false, error: error.message };
-        }
-
-        if (data.user) {
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', data.user.id)
-            .single();
-
-          if (profile) {
-            setCurrentUser({
-              id: profile.id,
-              email: data.user.email || '',
-              fullName: profile.full_name,
-              avatarUrl: profile.avatar_path,
-              phone: profile.phone,
-              isPlatformAdmin: profile.is_platform_admin,
-              paymentStatus: profile.payment_status || 'confirmed',
-              createdAt: profile.created_at,
-              updatedAt: profile.updated_at,
-            });
-          }
-        }
-
-        setIsLoading(false);
-        return { success: true };
-      } catch (err: any) {
-        setIsLoading(false);
-        return { success: false, error: err.message || 'Falha ao autenticar no Supabase' };
       }
-    }
 
-    // 4. Other sandbox profiles (Mateus, Gabriela)
-    const sandboxMatched = SANDBOX_PROFILES.find(p => p.email.toLowerCase() === cleanEmail);
-    if (sandboxMatched) {
-      setCurrentUser({
-        ...sandboxMatched,
-        paymentStatus: 'confirmed',
-      });
+      // 2. Usuário Comum com Acesso Totalmente Liberado (somosraon@gmail.com com 12345678)
+      if (cleanEmail === 'somosraon@gmail.com') {
+        if (cleanPassword === '12345678') {
+          const commonUserStore: Tenant = {
+            id: 'tenant-somosraon',
+            name: 'Loja Varejou RAON',
+            slug: 'loja-varejou-raon',
+            legalName: 'RAON Moda & Comércio LTDA',
+            documentNumber: '34.567.890/0001-12',
+            email: 'somosraon@gmail.com',
+            phone: '(75) 98864-4742',
+            segment: 'Moda, Calçados & Variedades',
+            status: 'active',
+            logoUrl: null,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          const commonUserProfile: Profile = {
+            id: 'user-somosraon',
+            email: 'somosraon@gmail.com',
+            fullName: 'Usuário Varejou (RAON)',
+            phone: '(75) 98864-4742',
+            isPlatformAdmin: false,
+            paymentStatus: 'confirmed',
+            storeName: 'Loja Varejou RAON',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          const commonUserMember: TenantMember = {
+            id: 'tm-somosraon',
+            tenantId: commonUserStore.id,
+            userId: commonUserProfile.id,
+            roleId: 'role-owner',
+            roleCode: 'owner',
+            roleName: 'Proprietário',
+            status: 'active',
+            userName: commonUserProfile.fullName,
+            userEmail: commonUserProfile.email,
+            userPhone: '(75) 98864-4742',
+            createdAt: new Date().toISOString(),
+          };
+
+          setCurrentUser(commonUserProfile);
+          setUserTenants([commonUserStore]);
+          setCurrentTenantId(commonUserStore.id);
+          setTenantMembers(prev => [commonUserMember, ...prev.filter(m => m.tenantId !== commonUserStore.id)]);
+          localStorage.setItem('raon_user', JSON.stringify(commonUserProfile));
+          localStorage.setItem('raon_tenants', JSON.stringify([commonUserStore]));
+          localStorage.setItem('raon_current_tenant_id', commonUserStore.id);
+          return { success: true };
+        } else {
+          return { success: false, error: 'Senha incorreta para o usuário somosraon@gmail.com.' };
+        }
+      }
+
+      // 2.5. Cliente Liberada para Cadastrar Loja sem Pagamento (sandradanila@hotmail.com com 12345678)
+      if (cleanEmail === 'sandradanila@hotmail.com') {
+        if (cleanPassword === '12345678') {
+          const userStoresKey = `varejou_user_tenants_${cleanEmail}`;
+          const savedTenants = safeParseJSON<Tenant[]>(localStorage.getItem(userStoresKey), []);
+
+          const clientProfile: Profile = {
+            id: 'user-sandra-danila',
+            email: 'sandradanila@hotmail.com',
+            fullName: 'Sandra Danila',
+            phone: savedTenants[0]?.phone || '',
+            isPlatformAdmin: false, // Não é administrador
+            accountRole: 'client',  // Apenas Cliente (não proprietário/admin)
+            paymentStatus: 'confirmed', // Sem necessidade de pagamento
+            storeName: savedTenants[0]?.name,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+
+          if (savedTenants.length > 0) {
+            const clientMemberships: TenantMember[] = savedTenants.map(t => ({
+              id: `tm-sandra-${t.id}`,
+              tenantId: t.id,
+              userId: clientProfile.id,
+              roleId: 'role-client',
+              roleCode: 'client',
+              roleName: 'Cliente',
+              status: 'active',
+              userName: clientProfile.fullName,
+              userEmail: clientProfile.email,
+              userPhone: t.phone || undefined,
+              createdAt: new Date().toISOString(),
+            }));
+            setTenantMembers(prev => [
+              ...clientMemberships,
+              ...prev.filter(m => m.userId !== clientProfile.id),
+            ]);
+          }
+
+          setCurrentUser(clientProfile);
+          setUserTenants(savedTenants);
+          setCurrentTenantId(savedTenants[0]?.id || '');
+          localStorage.setItem('raon_user', JSON.stringify(clientProfile));
+          localStorage.setItem('raon_tenants', JSON.stringify(savedTenants));
+          localStorage.setItem('raon_current_tenant_id', savedTenants[0]?.id || '');
+          return { success: true };
+        } else {
+          return { success: false, error: 'Senha incorreta para sandradanila@hotmail.com.' };
+        }
+      }
+
+      // 3. Check registered accounts in localStorage
+      const accounts = safeParseJSON<any[]>(localStorage.getItem('varejou_registered_accounts'), []);
+      const matched = accounts.find(acc => acc?.email?.toLowerCase() === cleanEmail);
+      if (matched) {
+        if (matched.password && cleanPassword && matched.password !== cleanPassword) {
+          return { success: false, error: 'Senha incorreta.' };
+        }
+        const loadedTenants = safeParseJSON<Tenant[]>(
+          localStorage.getItem(`varejou_user_tenants_${cleanEmail}`),
+          matched.tenant ? [matched.tenant] : []
+        );
+        setCurrentUser(matched.profile);
+        setUserTenants(loadedTenants);
+        setCurrentTenantId(loadedTenants[0]?.id || matched.tenant?.id || '');
+        return { success: true };
+      }
+
+      // 4. Supabase Live Auth (if active)
+      if (isSupabaseConfigured && supabase) {
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: cleanEmail,
+            password: cleanPassword || '12345678',
+          });
+
+          if (error) {
+            return { success: false, error: error.message };
+          }
+
+          if (data.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', data.user.id)
+              .single();
+
+            if (profile) {
+              setCurrentUser({
+                id: profile.id,
+                email: data.user.email || '',
+                fullName: profile.full_name,
+                avatarUrl: profile.avatar_path,
+                phone: profile.phone,
+                isPlatformAdmin: profile.is_platform_admin,
+                paymentStatus: profile.payment_status || 'confirmed',
+                createdAt: profile.created_at,
+                updatedAt: profile.updated_at,
+              });
+            }
+          }
+
+          return { success: true };
+        } catch (err: any) {
+          return { success: false, error: err.message || 'Falha ao autenticar no sistema.' };
+        }
+      }
+
+      // 5. Other sandbox profiles (Mateus, Gabriela)
+      const sandboxMatched = SANDBOX_PROFILES.find(p => p.email.toLowerCase() === cleanEmail);
+      if (sandboxMatched) {
+        setCurrentUser({
+          ...sandboxMatched,
+          paymentStatus: 'confirmed',
+        });
+        return { success: true };
+      }
+
+      return { success: false, error: 'E-mail não cadastrado. Cadastre a sua empresa agora mesmo.' };
+    } finally {
       setIsLoading(false);
-      return { success: true };
     }
-
-    setIsLoading(false);
-    return { success: false, error: 'E-mail não cadastrado. Cadastre a sua empresa agora mesmo.' };
   };
 
   const register = async (
@@ -586,16 +626,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     // Validation
-    const accountsJson = localStorage.getItem('varejou_registered_accounts');
-    const existingAccounts: any[] = accountsJson ? JSON.parse(accountsJson) : [];
-    if (existingAccounts.some(acc => acc.email === email) || email === 'agenciaraon@gmail.com') {
+    const existingAccounts = safeParseJSON<any[]>(localStorage.getItem('varejou_registered_accounts'), []);
+    const isSandraClient = email === 'sandradanila@hotmail.com';
+    if (!isSandraClient && (existingAccounts.some(acc => acc.email === email) || email === 'agenciaraon@gmail.com')) {
       setIsLoading(false);
       return { success: false, error: 'Este e-mail já está cadastrado. Faça login ou utilize outro.' };
     }
 
-    const isPaymentExempt = email === 'sandradanila@hotmail.com' || email === 'somosraon@gmail.com';
-    const newUserId = email === 'sandradanila@hotmail.com' ? 'user-sandra-danila' : `user-${Date.now()}`;
+    const isPaymentExempt = isSandraClient || email === 'somosraon@gmail.com';
+    const newUserId = isSandraClient ? 'user-sandra-danila' : `user-${Date.now()}`;
     const newTenantId = `tenant-${Date.now()}`;
+    const assignedRoleCode: RoleCode = isSandraClient ? 'client' : 'owner';
+    const assignedRoleName = isSandraClient ? 'Cliente' : 'Proprietário';
 
     const newProfile: Profile = {
       id: newUserId,
@@ -604,6 +646,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       phone: storeWhatsApp,
       avatarUrl: null,
       isPlatformAdmin: false,
+      accountRole: isSandraClient ? 'client' : undefined,
       paymentStatus: isPaymentExempt ? 'confirmed' : 'pending',
       storeName,
       storeColor,
@@ -629,9 +672,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: `member-${Date.now()}`,
       tenantId: newTenantId,
       userId: newUserId,
-      roleId: 'role-owner',
-      roleCode: 'owner',
-      roleName: 'Proprietário',
+      roleId: `role-${assignedRoleCode}`,
+      roleCode: assignedRoleCode,
+      roleName: assignedRoleName,
       status: 'active',
       userName: fullName,
       userEmail: email,
@@ -640,19 +683,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     // Save in registered accounts database
-    existingAccounts.push({
+    const filteredAccounts = existingAccounts.filter(acc => acc.email !== email);
+    filteredAccounts.push({
       email,
       password,
       profile: newProfile,
       tenant: newTenant,
     });
-    localStorage.setItem('varejou_registered_accounts', JSON.stringify(existingAccounts));
+    localStorage.setItem('varejou_registered_accounts', JSON.stringify(filteredAccounts));
     localStorage.setItem(`varejou_user_tenants_${email}`, JSON.stringify([newTenant]));
 
     setCurrentUser(newProfile);
     setUserTenants([newTenant]);
     setCurrentTenantId(newTenantId);
-    setTenantMembers(prev => [...prev, newMember]);
+    setTenantMembers(prev => [...prev.filter(m => m.userId !== newUserId), newMember]);
 
     setIsLoading(false);
     return { success: true };
@@ -754,13 +798,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: new Date().toISOString(),
     };
 
+    const isClientOnly =
+      currentUser.accountRole === 'client' ||
+      currentUser.email.toLowerCase() === 'sandradanila@hotmail.com';
+    const assignedRoleCode: RoleCode = isClientOnly ? 'client' : 'owner';
+
     const newMembership: TenantMember = {
       id: `tm-${Date.now()}`,
       tenantId: newTenantId,
       userId: currentUser.id,
-      roleId: 'role-owner',
-      roleCode: 'owner',
-      roleName: 'Proprietário',
+      roleId: `role-${assignedRoleCode}`,
+      roleCode: assignedRoleCode,
+      roleName: isClientOnly ? 'Cliente' : 'Proprietário',
       status: 'active',
       userName: currentUser.fullName,
       userEmail: currentUser.email,
@@ -773,6 +822,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUserTenants(updatedTenantsList);
     setTenantMembers(prev => [...prev, newMembership]);
     setCurrentTenantId(newTenantId);
+    localStorage.setItem('raon_tenants', JSON.stringify(updatedTenantsList));
+    localStorage.setItem('raon_current_tenant_id', newTenantId);
     if (currentUser?.email) {
       localStorage.setItem(`varejou_user_tenants_${currentUser.email.toLowerCase()}`, JSON.stringify(updatedTenantsList));
     }

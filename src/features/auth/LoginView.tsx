@@ -193,6 +193,10 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 <input
                   type="email"
                   required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  autoComplete="email"
                   placeholder="seuemail@loja.com.br"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -220,6 +224,9 @@ export const LoginView: React.FC<LoginViewProps> = ({
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}

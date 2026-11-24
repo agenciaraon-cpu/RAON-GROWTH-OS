@@ -2,7 +2,7 @@
 // RAON System — Definições de Tipos TypeScript (Etapa 1)
 // ==============================================================================
 
-export type RoleCode = 'owner' | 'manager' | 'cashier' | 'sales' | 'stock' | 'financial';
+export type RoleCode = 'owner' | 'manager' | 'cashier' | 'sales' | 'stock' | 'financial' | 'client';
 
 export interface Profile {
   id: string;
@@ -12,6 +12,7 @@ export interface Profile {
   avatarUrl?: string | null;
   phone?: string | null;
   isPlatformAdmin?: boolean;
+  accountRole?: 'admin' | 'client';
   paymentStatus?: 'pending' | 'confirmed';
   storeName?: string;
   storeColor?: string;

@@ -668,8 +668,8 @@ export const DashboardOverview: React.FC<DashboardOverviewProps> = ({ onNavigate
           <div className="space-y-3">
             {[
               {
-                title: 'Acesso de Administrador Realizado',
-                desc: `${currentUser?.fullName} autenticou-se com sucesso na empresa ${currentTenant?.name}.`,
+                title: currentUser?.isPlatformAdmin ? 'Acesso de Administrador Realizado' : 'Acesso Realizado na Loja',
+                desc: `${currentUser?.fullName} autenticou-se com sucesso na loja ${currentTenant?.name}${currentMemberRole === 'client' ? ' (Cliente)' : ''}.`,
                 time: 'Há poucos instantes',
                 actor: currentUser?.fullName || 'Usuário',
               },
